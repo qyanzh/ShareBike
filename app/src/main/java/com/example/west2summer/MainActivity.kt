@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,10 +28,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        hideKeyboard()
         val navController = findNavController(R.id.nav_host_fragment)
         return NavigationUI.navigateUp(navController,binding.drawerLayout)
     }
+
 
     private fun setupNavigation() {
         //find the nav controller
@@ -68,9 +69,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun hideKeyboard() {
-        val inputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(binding.toolbar.windowToken, 0)
-    }
+
 }
