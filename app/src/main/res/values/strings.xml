@@ -6,7 +6,7 @@
     <string name="my_info">个人信息</string>
     <string name="my_want">我的想租</string>
     <string name="history_order">历史订单</string>
-    <string name="toolbar_add">新增</string>
+    <string name="toolbar_add">发布共享</string>
     <string name="toolbar_edit">编辑</string>
     <string name="edit_battery">剩余公里数(KM)</string>
     <string name="edit_note">备注</string>

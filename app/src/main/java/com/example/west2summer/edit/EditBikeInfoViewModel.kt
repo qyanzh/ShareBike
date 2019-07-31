@@ -3,10 +3,7 @@ package com.example.west2summer.edit
 import android.app.Application
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.geocoder.GeocodeQuery
 import com.amap.api.services.geocoder.GeocodeSearch
@@ -21,6 +18,8 @@ import com.example.west2summer.database.BikeInfoNetwork
 import com.example.west2summer.database.MyDatabase
 import com.example.west2summer.database.getDatabase
 import kotlinx.coroutines.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class EditBikeInfoViewModel(
     application: Application,
@@ -33,17 +32,30 @@ class EditBikeInfoViewModel(
 
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
+    private val timeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
+
     var mode: String
     val MODE_ADD = application.resources.getString(R.string.toolbar_add)
     val MODE_EDIT = application.resources.getString(R.string.toolbar_edit)
 
     val uiPlace = MutableLiveData<String?>()
     val uiBattery = MutableLiveData<String?>()
-    val uiFrom = MutableLiveData<String?>()
-    val uiTo = MutableLiveData<String?>()
     val uiPrice = MutableLiveData<String?>()
     val uiNote = MutableLiveData<String?>()
     val placeSuggestionsList = MutableLiveData<List<String>>()
+
+    val preuiFrom = MutableLiveData<Calendar?>()
+    val uiFrom = Transformations.map(preuiFrom) {
+        it?.let {
+            timeFormatter.format(it.time)
+        }
+    }
+    val preuiTo = MutableLiveData<Calendar?>()
+    val uiTo = Transformations.map(preuiTo) {
+        it?.let {
+            timeFormatter.format(it.time)
+        }
+    }
 
 
     init {
@@ -109,6 +121,20 @@ class EditBikeInfoViewModel(
             }
         }
     }
+
+    var shouldOpenPicker = MutableLiveData<Int>()//0 for nothing.
+
+    fun onTimeClicked(mode: Int) {
+        shouldOpenPicker.value = mode
+    }
+
+    fun onPickerShowed(c: Calendar) {
+        when (shouldOpenPicker.value) {
+            1 -> preuiFrom.value = c
+            2 -> preuiTo.value = c
+        }
+    }
+
 
     fun onDoneMenuClicked() {
         uiScope.launch {

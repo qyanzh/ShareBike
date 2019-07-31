@@ -16,6 +16,9 @@
 
 
         <LinearLayout
+            android:id="@+id/root_linear"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -45,16 +48,14 @@
 
 
                     <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-
                         android:id="@+id/tv_auto_complete"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:completionThreshold="1"
                         android:minHeight="56dp"
                         android:paddingHorizontal="12dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
                         android:text="@={viewModel.uiPlace}"
+                        android:textSize="15sp"
                         tools:targetApi="o" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -113,9 +114,13 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:imeOptions="actionNext"
+                        android:onClick="@{()->viewModel.onTimeClicked(1)}"
                         android:singleLine="true"
-                        android:text="@={viewModel.uiFrom}" />
+                        android:text="@{viewModel.uiFrom}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -143,9 +148,13 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:imeOptions="actionNext"
+                        android:onClick="@{()->viewModel.onTimeClicked(2)}"
                         android:singleLine="true"
-                        android:text="@={viewModel.uiTo}" />
+                        android:text="@{viewModel.uiTo}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -197,9 +206,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
+                    android:hint="@string/edit_note"
                     app:helperText="@string/will_show_your_contact"
-                    app:helperTextEnabled="true"
-                    android:hint="@string/edit_note">
+                    app:helperTextEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
