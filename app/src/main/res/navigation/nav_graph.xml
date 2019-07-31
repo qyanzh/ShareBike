@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/map_fragment">
+
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.example.west2summer.map.MapFragment"
+        android:label="共享电动"
+        tools:layout="@layout/map_fragment">
+        <action
+            android:id="@+id/action_map_fragment_to_bike_info_dialog"
+            app:destination="@id/bike_info_dialog" />
+        <action
+            android:id="@+id/action_map_fragment_to_editBikeInfoFragment"
+            app:destination="@id/editBikeInfoFragment" />
+    </fragment>
+    <dialog
+        tools:layout="@layout/bike_info_dialog_fragment"
+        android:id="@+id/bike_info_dialog"
+        android:name="com.example.west2summer.dialog.BikeInfoDialogFragment"
+        android:label="BikeInfoDialogFragment" >
+        <argument
+            android:name="bikeinfo"
+            app:argType="com.example.west2summer.database.BikeInfo" />
+    </dialog>
+
+    <fragment
+        android:id="@+id/editBikeInfoFragment"
+        android:name="com.example.west2summer.edit.EditBikeInfoFragment"
+        android:label="@string/toolbar_add"
+        tools:layout="@layout/edit_bike_info_fragment">
+        <argument
+            android:name="bikeinfo"
+            app:argType="com.example.west2summer.database.BikeInfo" />
+        <action
+            android:id="@+id/action_addBikeInfoFragment_to_blankFragment"
+            app:destination="@id/edit_done" />
+    </fragment>
+    <fragment
+        android:id="@+id/edit_done"
+        android:name="com.example.west2summer.BlankFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" />
+
+</navigation>
