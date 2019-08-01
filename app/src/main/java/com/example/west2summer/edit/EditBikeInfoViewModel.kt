@@ -32,7 +32,7 @@ class EditBikeInfoViewModel(
 
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    private val timeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
+    private val timeFormatter by lazy { SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault()) }
 
     var mode: String
     val MODE_ADD = application.resources.getString(R.string.toolbar_add)
@@ -167,13 +167,11 @@ class EditBikeInfoViewModel(
         viewModelJob.cancel()
     }
 
-    class Factory(val app: Application, val bikeInfo: BikeInfo) : ViewModelProvider.Factory {
+    class Factory(val app: Application, val bikeInfo: BikeInfo) :
+        ViewModelProvider.NewInstanceFactory() {
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(EditBikeInfoViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return EditBikeInfoViewModel(app, bikeInfo) as T
-            }
-            throw IllegalArgumentException("Unable to construct viewmodel")
+            return EditBikeInfoViewModel(app, bikeInfo) as T
         }
     }
 

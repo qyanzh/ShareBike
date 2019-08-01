@@ -2,6 +2,7 @@ package com.example.west2summer.edit
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
@@ -64,12 +65,12 @@ class EditBikeInfoFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
 
-        val adapter = AutoSuggestAdapter(
-            context!!,
-            R.layout.text_auto_complete, mutableListOf<String>()
-        ).apply {
-            binding.tvAutoComplete.setAdapter(this)
-        }
+        binding.tvAutoComplete.setAdapter(
+            AutoSuggestAdapter(
+                context!!,
+                R.layout.text_auto_complete, mutableListOf<String>()
+            )
+        )
 
         (activity as MainActivity).apply {
             binding.drawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED)
@@ -79,16 +80,23 @@ class EditBikeInfoFragment : Fragment() {
             }
         }
 
+        subscribeUi()
+
+        return binding.root
+    }
+
+    private fun subscribeUi() {
         viewModel.uiPlace.observe(this, Observer {
             viewModel.refreshPlaceSuggestion()
         })
 
         viewModel.placeSuggestionsList.observe(this, Observer {
-            adapter.clear()
-            adapter.addAll(it)
-            adapter.notifyDataSetChanged()
+            (binding.tvAutoComplete.adapter as AutoSuggestAdapter).apply {
+                clear()
+                addAll(it)
+                notifyDataSetChanged()
+            }
         })
-
 
         viewModel.shouldOpenPicker.observe(this, Observer {
             hideKeyboard()
@@ -97,22 +105,18 @@ class EditBikeInfoFragment : Fragment() {
                     val c = Calendar.getInstance()
                     c.time = date
                     viewModel.onPickerShowed(c)
-                    binding.rootLinear.requestFocus()
-                }.addOnCancelClickListener {
-                    binding.rootLinear.requestFocus()
                 }.setType(booleanArrayOf(true, true, true, true, true, false))
                     .setSubmitColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
                     .setCancelColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
-                    .setOutSideCancelable(false)
                 when (it) {
                     1 -> viewModel.preuiFrom.value?.let { c -> pvBuilder.setDate(c) }
                     2 -> viewModel.preuiTo.value?.let { c -> pvBuilder.setDate(c) }
                 }
-                pvBuilder.build().show()
+                pvBuilder.build().setOnDismissListener {
+                    binding.rootLinear.requestFocus()
+                }.show()
             }
         })
-
-        return binding.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -127,7 +131,6 @@ class EditBikeInfoFragment : Fragment() {
         }
         return true
     }
-
 
     override fun onStop() {
         (activity as MainActivity).binding.apply {

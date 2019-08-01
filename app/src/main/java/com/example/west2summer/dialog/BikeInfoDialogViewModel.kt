@@ -4,14 +4,12 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.BikeInfoDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 
 class BikeInfoDialogViewModel(
-    val application:Application,
+    val application: Application,
     private val bikeInfo: BikeInfo
 ) : ViewModel() {
 
@@ -24,13 +22,11 @@ class BikeInfoDialogViewModel(
 
     }
 
-    class Factory(val app: Application,val bikeInfo:BikeInfo) : ViewModelProvider.Factory {
+    class Factory(val app: Application, val bikeInfo: BikeInfo) :
+        ViewModelProvider.NewInstanceFactory() {
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(BikeInfoDialogViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return BikeInfoDialogViewModel(app,bikeInfo) as T
-            }
-            throw IllegalArgumentException("Unable to construct viewmodel")
+            return BikeInfoDialogViewModel(app, bikeInfo) as T
         }
     }
 
