@@ -25,7 +25,7 @@ interface BikeInfoDao {
     fun insert(bikeinfos: BikeInfo)
 }
 
-@Database(entities = [BikeInfo::class], version = 2)
+@Database(entities = [BikeInfo::class], version = 1)
 abstract class MyDatabase : RoomDatabase() {
     abstract val bikeInfoDao: BikeInfoDao
 }

@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
         setupNavigation()
-        requestPermission()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -47,28 +46,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun requestPermission() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val permissions = mutableListOf<String>()
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-                   permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-            if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Toast.makeText(this, "需要定位服务来显示附近车辆", Toast.LENGTH_SHORT).show()
-            }
-            if(shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                Toast.makeText(this, "需要外部存储权限来缓存地图数据", Toast.LENGTH_SHORT).show()
-            }
-            if(permissions.size!=0) {
-                requestPermissions(permissions.toTypedArray(),0)
-            }
-        }
-    }
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {

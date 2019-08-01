@@ -2,7 +2,6 @@ package com.example.west2summer.edit
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
@@ -105,9 +104,12 @@ class EditBikeInfoFragment : Fragment() {
                     val c = Calendar.getInstance()
                     c.time = date
                     viewModel.onPickerShowed(c)
+                }.addOnCancelClickListener {
+                    viewModel.onPickerShowed(null)
                 }.setType(booleanArrayOf(true, true, true, true, true, false))
                     .setSubmitColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
                     .setCancelColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
+                    .setCancelText(getString(R.string.clear))
                 when (it) {
                     1 -> viewModel.preuiFrom.value?.let { c -> pvBuilder.setDate(c) }
                     2 -> viewModel.preuiTo.value?.let { c -> pvBuilder.setDate(c) }

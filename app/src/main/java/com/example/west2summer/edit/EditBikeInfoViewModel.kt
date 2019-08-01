@@ -54,7 +54,7 @@ class EditBikeInfoViewModel(
     val uiTo = Transformations.map(preuiTo) {
         it?.let {
             timeFormatter.format(it.time)
-        }
+        } ?: ""
     }
 
 
@@ -68,8 +68,20 @@ class EditBikeInfoViewModel(
                 database = getDatabase(application)
             }
 
+//            TODO:从服务器获取infoId
 //            bikeInfo.infoId ?: initBikeInfoId()
             uiPlace.value = bikeInfo.place ?: getInitUiPlace()
+            with(bikeInfo) {
+                battery?.let { uiBattery.value = it.toString() }
+                availableFrom?.let {
+                    preuiFrom.value = Calendar.getInstance().apply { timeInMillis = it }
+                }
+                availableTo?.let {
+                    preuiTo.value = Calendar.getInstance().apply { timeInMillis = it }
+                }
+                price?.let { uiPrice.value = price.toString() }
+                note?.let { uiNote.value = note }
+            }
         }
     }
 
@@ -80,7 +92,9 @@ class EditBikeInfoViewModel(
                 bikeInfo.infoId = BikeInfoNetwork.bikeInfoService.getNewInfoId().await()
                 bikeInfo.infoId ?: throw Exception("null infoId")
             } catch (e: Exception) {
-                Toast.makeText(getApplication(), "获取infoId失败", Toast.LENGTH_SHORT).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(getApplication(), "获取infoId失败", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -128,7 +142,7 @@ class EditBikeInfoViewModel(
         shouldOpenPicker.value = mode
     }
 
-    fun onPickerShowed(c: Calendar) {
+    fun onPickerShowed(c: Calendar?) {
         when (shouldOpenPicker.value) {
             1 -> preuiFrom.value = c
             2 -> preuiTo.value = c
@@ -139,17 +153,20 @@ class EditBikeInfoViewModel(
     fun onDoneMenuClicked() {
         uiScope.launch {
             withContext(Dispatchers.IO) {
-                val placeToFormattedResult =
-                    GeocodeQuery(uiPlace.value, "fujian").await(getApplication()).geocodeAddressList
-                if (placeToFormattedResult.isNotEmpty()) {
+                try {
+                    val placeToFormattedResult =
+                        GeocodeQuery(
+                            uiPlace.value,
+                            "fujian"
+                        ).await(getApplication()).geocodeAddressList[0]
                     bikeInfo.place = uiPlace.value
-                    bikeInfo.latitude = placeToFormattedResult[0].latLonPoint.latitude
-                    bikeInfo.longitude = placeToFormattedResult[0].latLonPoint.longitude
+                    bikeInfo.latitude = placeToFormattedResult.latLonPoint.latitude
+                    bikeInfo.longitude = placeToFormattedResult.latLonPoint.longitude
                     Log.d(
                         "EditBikeInfoViewModel", "onDoneMenuClicked: " +
-                                "place have been convert to ${placeToFormattedResult[0].formatAddress}"
+                                "place have been convert to ${placeToFormattedResult.formatAddress}"
                     )
-                } else {
+                } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
                             getApplication(),
@@ -158,6 +175,25 @@ class EditBikeInfoViewModel(
                         ).show()
                     }
                 }
+                if (!uiBattery.value.isNullOrEmpty()) {
+                    bikeInfo.battery = uiBattery.value!!.toDouble()
+                }
+                if (!uiPrice.value.isNullOrEmpty()) {
+                    bikeInfo.battery = uiPrice.value!!.toDouble()
+                }
+                if (!uiNote.value.isNullOrEmpty()) {
+                    bikeInfo.note = uiNote.value!!
+                }
+                preuiFrom.value?.let { bikeInfo.availableFrom = it.timeInMillis }
+                preuiTo.value?.let { bikeInfo.availableTo = it.timeInMillis }
+                //TODO: 上传到服务器
+                bikeInfo.infoId = 1
+                database.bikeInfoDao.insert(bikeInfo)
+                val temp = database.bikeInfoDao.getAll()
+                Log.d(
+                    "EditBikeInfoViewModel", "onDoneMenuClicked: " +
+                            "\n${temp.value}"
+                )
             }
         }
     }
