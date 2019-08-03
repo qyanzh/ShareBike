@@ -14,7 +14,6 @@ import com.amap.api.services.help.InputtipsQuery
 import com.example.west2summer.R
 import com.example.west2summer.await
 import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.BikeInfoNetwork
 import com.example.west2summer.database.MyDatabase
 import com.example.west2summer.database.getDatabase
 import kotlinx.coroutines.*
@@ -89,7 +88,7 @@ class EditBikeInfoViewModel(
     private suspend fun initBikeInfoId() {
         withContext(Dispatchers.Default) {
             try {
-                bikeInfo.infoId = BikeInfoNetwork.bikeInfoService.getNewInfoId().await()
+//                bikeInfo.infoId = BikeInfoNetwork.bikeInfoService.getNewInfoId().await()
                 bikeInfo.infoId ?: throw Exception("null infoId")
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -125,11 +124,13 @@ class EditBikeInfoViewModel(
             withContext(Dispatchers.IO) {
                 val tipList =
                     Inputtips(getApplication(), InputtipsQuery(uiPlace.value, "fujian")).await()
-                if (tipList.isNotEmpty()) {
-                    withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main) {
+                    if (tipList.isNotEmpty()) {
                         placeSuggestionsList.value = tipList.map {
                             it.district + it.name
                         }
+                    } else {
+                        placeSuggestionsList.value = listOf()
                     }
                 }
             }
@@ -187,13 +188,9 @@ class EditBikeInfoViewModel(
                 preuiFrom.value?.let { bikeInfo.availableFrom = it.timeInMillis }
                 preuiTo.value?.let { bikeInfo.availableTo = it.timeInMillis }
                 //TODO: 上传到服务器
-                bikeInfo.infoId = 1
+                bikeInfo.infoId = System.currentTimeMillis()
                 database.bikeInfoDao.insert(bikeInfo)
-                val temp = database.bikeInfoDao.getAll()
-                Log.d(
-                    "EditBikeInfoViewModel", "onDoneMenuClicked: " +
-                            "\n${temp.value}"
-                )
+
             }
         }
     }

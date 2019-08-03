@@ -3,6 +3,7 @@ package com.example.west2summer.map
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.*
+import com.amap.api.maps.model.CameraPosition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +17,7 @@ class MapViewModel(
 //    private val bikeInfoRepository = BikeInfoRepository(getDatabase(application))
 
 //    private val infoList = bikeInfoRepository.bikeinfos
+
 
     private val viewModelJob = Job()
 

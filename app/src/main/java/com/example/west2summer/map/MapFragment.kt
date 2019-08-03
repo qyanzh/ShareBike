@@ -48,7 +48,10 @@ class MapFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-//        binding = MapFragmentBinding.inflate(inflater)
+        Log.d(
+            "MapFragment", "onAttach: " +
+                    ""
+        )
         binding = DataBindingUtil.inflate(
             LayoutInflater.from(context),
             R.layout.map_fragment,
@@ -56,35 +59,39 @@ class MapFragment : Fragment() {
             false
         )
         // init mapview
-        map = binding.mapView.map.apply {
-            cameraPosition?.let {
-                moveCamera(CameraUpdateFactory.newCameraPosition(it))
-            }
-            moveCamera(CameraUpdateFactory.zoomTo(17f))
+        map = binding.mapView.map
+        map.apply {
             myLocationStyle = MyLocationStyle().apply {
-                //                interval(2000)
-//                myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER)
                 myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE)
+            }
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                isMyLocationEnabled = true
             }
             uiSettings?.apply {
                 isMyLocationButtonEnabled = true
                 isZoomControlsEnabled = false
                 isRotateGesturesEnabled = false
-//                setMapStatusLimits(
-//                    LatLngBounds(
-//                        southwestLatLng,
-//                        northeastLatLng
-//                    )
-//                )
+            }
+            savedCameraPosition?.let {
+                moveCamera(CameraUpdateFactory.newCameraPosition(it))
+                Log.d(
+                    "MapFragment", "onAttach: " +
+                            "has camera position"
+                )
             }
         }
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            map.isMyLocationEnabled = true
-        }
+
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestPermission()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -94,7 +101,7 @@ class MapFragment : Fragment() {
             "MapFragment", "onCreateView: " +
                     ""
         )
-        requestPermission()
+
         binding.mapView.onCreate(savedInstanceState)
         //setup viewmodel
         binding.viewModel = viewModel
@@ -105,7 +112,6 @@ class MapFragment : Fragment() {
                 viewModel.doneNavigating()
             }
         })
-
 
         addMarkersRandomly()
         return binding.root
@@ -128,7 +134,7 @@ class MapFragment : Fragment() {
 
 
     companion object {
-        var cameraPosition: CameraPosition? = null
+        var savedCameraPosition: CameraPosition? = null
         val southwestLatLng = LatLng(26.041229, 119.175761)
         val northeastLatLng = LatLng(26.07757, 119.210339)
     }
@@ -152,6 +158,8 @@ class MapFragment : Fragment() {
             // 返回 true 则表示接口已响应事件，否则返回false
             true
         }
+
+
         // 绑定 Marker 被点击事件
         map.setOnMarkerClickListener(markerClickListener)
     }
@@ -172,8 +180,12 @@ class MapFragment : Fragment() {
             "MapFragment", "onPause: " +
                     ""
         )
-        cameraPosition = map.cameraPosition
         binding.mapView.onPause()
+    }
+
+    override fun onStop() {
+        savedCameraPosition = map.cameraPosition
+        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -214,10 +226,18 @@ class MapFragment : Fragment() {
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
             if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Toast.makeText(context, "需要定位服务来显示附近车辆", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    getString(R.string.location_permission_needed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                Toast.makeText(context, "需要外部存储权限来缓存地图数据", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    getString(R.string.strorage_permission_needed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             if (permissions.size != 0) {
                 requestPermissions(permissions.toTypedArray(), 0)

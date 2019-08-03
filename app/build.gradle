@@ -11,6 +11,13 @@ apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion 29
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+    packagingOptions {
+        exclude 'META-INF/library-core_release.kotlin_module'
+    }
     defaultConfig {
         applicationId "com.example.west2summer"
         minSdkVersion 21
@@ -60,11 +67,13 @@ dependencies {
     //Room
     def room_version = "2.2.0-alpha01" // 2.1.0 for latest stable version
     implementation "androidx.room:room-runtime:$room_version"
-
-    kapt "androidx.room:room-compiler:$room_version"
     // For Kotlin use kapt instead of annotationProcessor
+    kapt "androidx.room:room-compiler:$room_version"
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
+    //test
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    implementation 'org.mockito:mockito-android:3.0.0'
 
     //Retrofit & moshiConverter
     implementation 'com.squareup.retrofit2:retrofit:2.6.0'
@@ -77,8 +86,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
 
     //Material Design
-    implementation 'com.google.android.material:material:1.1.0-alpha06'
+    implementation 'com.google.android.material:material:1.1.0-alpha08'
 
     //PickerView
-    implementation 'com.contrarywind:Android-PickerView:4.1.7'
+    implementation 'com.contrarywind:Android-PickerView:4.1.8'
 }

@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">共享电动</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="my_info">个人信息</string>
     <string name="my_want">我的想租</string>
@@ -22,4 +21,6 @@
     <string name="discard">放弃</string>
     <string name="cancel">取消</string>
     <string name="clear">清除</string>
+    <string name="location_permission_needed">需要定位服务来显示附近车辆</string>
+    <string name="strorage_permission_needed">需要外部存储权限来缓存地图数据</string>
 </resources>

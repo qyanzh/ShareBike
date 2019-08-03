@@ -56,7 +56,7 @@ suspend fun GeocodeQuery.await(context: Context): GeocodeResult = suspendCorouti
 }
 
 suspend fun Inputtips.await(): List<Tip> = suspendCoroutine { cont ->
-    setInputtipsListener { result, code ->
+    setInputtipsListener { result, _ ->
         //        result?.let {
 //            for (tip in it) {
 //                Log.d(
