@@ -23,8 +23,7 @@ class BikeInfoDialogFragment: BottomSheetDialogFragment() {
                 activity.application,
                 BikeInfoDialogFragmentArgs.fromBundle(arguments!!).bikeinfo
             )
-        )
-            .get(BikeInfoDialogViewModel::class.java)
+        ).get(BikeInfoDialogViewModel::class.java)
     }
 
     override fun onCreateView(

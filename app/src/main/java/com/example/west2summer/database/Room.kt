@@ -10,7 +10,7 @@ interface BikeInfoDao {
     fun getAll(): LiveData<List<BikeInfo>>
 
     @Query("select * from bikeinfo where infoId= :infoId")
-    fun get(infoId: Long): LiveData<BikeInfo>
+    fun get(infoId: Long): BikeInfo
 
     @Query("delete from bikeinfo")
     fun deleteAll()

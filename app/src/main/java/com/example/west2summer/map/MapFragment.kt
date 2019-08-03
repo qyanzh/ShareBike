@@ -2,11 +2,9 @@ package com.example.west2summer.map
 
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,20 +17,13 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.amap.api.maps.AMap
 import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.CameraPosition
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.MarkerOptions
 import com.amap.api.maps.model.MyLocationStyle
 import com.example.west2summer.R
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.databinding.MapFragmentBinding
-import org.jetbrains.annotations.TestOnly
-import kotlin.random.Random
 
 
 class MapFragment : Fragment() {
-
-    val TAG = "MapFragment"
 
     private lateinit var binding: MapFragmentBinding
 
@@ -46,78 +37,46 @@ class MapFragment : Fragment() {
             .get(MapViewModel::class.java)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Log.d(
-            "MapFragment", "onAttach: " +
-                    ""
-        )
-        binding = DataBindingUtil.inflate(
-            LayoutInflater.from(context),
-            R.layout.map_fragment,
-            null,
-            false
-        )
-        // init mapview
-        map = binding.mapView.map
-        map.apply {
-            myLocationStyle = MyLocationStyle().apply {
-                myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE)
-            }
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                == PackageManager.PERMISSION_GRANTED
-            ) {
-                isMyLocationEnabled = true
-            }
-            uiSettings?.apply {
-                isMyLocationButtonEnabled = true
-                isZoomControlsEnabled = false
-                isRotateGesturesEnabled = false
-            }
-            savedCameraPosition?.let {
-                moveCamera(CameraUpdateFactory.newCameraPosition(it))
-                Log.d(
-                    "MapFragment", "onAttach: " +
-                            "has camera position"
-                )
-            }
-        }
-
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requestPermission()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d(
-            "MapFragment", "onCreateView: " +
-                    ""
-        )
-
-        binding.mapView.onCreate(savedInstanceState)
-        //setup viewmodel
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
-        viewModel.navigateToAdd.observe(this, Observer { shouldNavigateToAdd ->
-            if (shouldNavigateToAdd) {
-                navigateToAdd()
-                viewModel.doneNavigating()
-            }
-        })
-
-        addMarkersRandomly()
+        subscribeUi()
         return binding.root
     }
 
-    private fun navigateToAdd() {
+    private fun subscribeUi() {
+        viewModel.markerMapping.observe(this, Observer {
+            refreshMarkers()
+        })
+
+        binding.fab.setOnClickListener {
+            navigateToAddFragment()
+        }
+    }
+
+    private fun refreshMarkers() {
+        with(map) {
+            clear(true)
+            viewModel.markerMapping.value?.keys?.forEach {
+                addMarker(it)
+            }
+            setOnMarkerClickListener() {
+                if (viewModel.markerMapping.value?.containsKey(it.options)!!) {
+                    findNavController().navigate(
+                        MapFragmentDirections.actionMapFragmentToEditBikeInfoFragment(
+                            viewModel.markerMapping.value!![it.options]!!
+                        )
+                    )
+                }
+                true
+            }
+        }
+    }
+
+    private fun navigateToAddFragment() {
         val bikeInfo = BikeInfo(123)
         map.myLocation?.let {
             bikeInfo.apply {
@@ -132,78 +91,50 @@ class MapFragment : Fragment() {
         )
     }
 
-
-    companion object {
-        var savedCameraPosition: CameraPosition? = null
-        val southwestLatLng = LatLng(26.041229, 119.175761)
-        val northeastLatLng = LatLng(26.07757, 119.210339)
-    }
-
-    @TestOnly
-    private fun addMarkersRandomly() {
-        for (i in 1..20) {
-            val lat = Random.nextDouble(26.050055, 26.056851)
-            val lng = Random.nextDouble(
-                119.189396,
-                119.19266
-            )
-            val latLng = LatLng(lat, lng)
-            map.addMarker(
-                MarkerOptions().position(latLng)
-            )
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestPermission()
+        binding = DataBindingUtil.inflate(
+            LayoutInflater.from(context),
+            R.layout.map_fragment,
+            null,
+            false
+        )
+        map = binding.mapView.map.apply {
+            uiSettings?.apply {
+                isMyLocationButtonEnabled = true
+                isZoomControlsEnabled = false
+                isRotateGesturesEnabled = false
+            }
+            myLocationStyle = MyLocationStyle().apply {
+                myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE)
+            }
+            if (haveLocatePermission()) {
+                isMyLocationEnabled = true
+            }
+            moveCamera(CameraUpdateFactory.zoomTo(17f))
         }
-        // 定义 Marker 点击事件监听
-        val markerClickListener = AMap.OnMarkerClickListener {
-            // marker 对象被点击时回调的接口
-            // 返回 true 则表示接口已响应事件，否则返回false
-            true
-        }
-
-
-        // 绑定 Marker 被点击事件
-        map.setOnMarkerClickListener(markerClickListener)
+        binding.mapView.onCreate(savedInstanceState)
     }
 
     override fun onResume() {
         super.onResume()
-//        hideKeyboard()
-        Log.d(
-            "MapFragment", "onResume: " +
-                    ""
-        )
         binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(
-            "MapFragment", "onPause: " +
-                    ""
-        )
         binding.mapView.onPause()
-    }
-
-    override fun onStop() {
-        savedCameraPosition = map.cameraPosition
-        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d(
-            "MapFragment", "onSaveInstanceState: " +
-                    ""
-        )
         binding.mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         binding.mapView.onDestroy()
-        Log.d(
-            "MapFragment", "onDestroy: " +
-                    ""
-        )
     }
 
     private fun requestPermission() {
@@ -212,16 +143,14 @@ class MapFragment : Fragment() {
             if (ContextCompat.checkSelfPermission(
                     context!!,
                     Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                != PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
             if (ContextCompat.checkSelfPermission(
                     context!!,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
-                )
-                != PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
@@ -243,6 +172,13 @@ class MapFragment : Fragment() {
                 requestPermissions(permissions.toTypedArray(), 0)
             }
         }
+    }
+
+    private fun haveLocatePermission(): Boolean {
+        return (ContextCompat.checkSelfPermission(
+            context!!,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED)
     }
 
     override fun onRequestPermissionsResult(

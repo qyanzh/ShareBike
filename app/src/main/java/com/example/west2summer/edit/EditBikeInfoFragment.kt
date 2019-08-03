@@ -124,7 +124,10 @@ class EditBikeInfoFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.edit_done -> viewModel.onDoneMenuClicked()
+            R.id.edit_done -> {
+                viewModel.onDoneMenuClicked()
+                findNavController().navigateUp()
+            }
             android.R.id.home -> requireActivity().onBackPressed()
         }
         return true

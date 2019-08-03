@@ -4,18 +4,13 @@ import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
-import com.amap.api.services.core.LatLonPoint
-import com.amap.api.services.geocoder.GeocodeQuery
-import com.amap.api.services.geocoder.GeocodeSearch
-import com.amap.api.services.geocoder.RegeocodeQuery
-import com.amap.api.services.geocoder.RegeocodeResult
-import com.amap.api.services.help.Inputtips
-import com.amap.api.services.help.InputtipsQuery
 import com.example.west2summer.R
-import com.example.west2summer.await
+import com.example.west2summer.convertLatLngToPlace
+import com.example.west2summer.convertPlaceToAddress
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.database.MyDatabase
 import com.example.west2summer.database.getDatabase
+import com.example.west2summer.getSuggestionTipsList
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,7 +42,7 @@ class EditBikeInfoViewModel(
     val uiFrom = Transformations.map(preuiFrom) {
         it?.let {
             timeFormatter.format(it.time)
-        }
+        } ?: ""
     }
     val preuiTo = MutableLiveData<Calendar?>()
     val uiTo = Transformations.map(preuiTo) {
@@ -55,7 +50,6 @@ class EditBikeInfoViewModel(
             timeFormatter.format(it.time)
         } ?: ""
     }
-
 
     init {
         mode = when (bikeInfo.infoId) {
@@ -68,7 +62,7 @@ class EditBikeInfoViewModel(
             }
 
 //            TODO:从服务器获取infoId
-//            bikeInfo.infoId ?: initBikeInfoId()
+            bikeInfo.infoId ?: initBikeInfoId()
             uiPlace.value = bikeInfo.place ?: getInitUiPlace()
             with(bikeInfo) {
                 battery?.let { uiBattery.value = it.toString() }
@@ -88,6 +82,7 @@ class EditBikeInfoViewModel(
     private suspend fun initBikeInfoId() {
         withContext(Dispatchers.Default) {
             try {
+                bikeInfo.infoId = System.currentTimeMillis()
 //                bikeInfo.infoId = BikeInfoNetwork.bikeInfoService.getNewInfoId().await()
                 bikeInfo.infoId ?: throw Exception("null infoId")
             } catch (e: Exception) {
@@ -99,45 +94,44 @@ class EditBikeInfoViewModel(
     }
 
     private suspend fun getInitUiPlace(): String? {
+        var result: String? = null
         if (bikeInfo.latitude != null && bikeInfo.latitude != null) {
-            var regeocodeResult: RegeocodeResult? = null
             withContext(Dispatchers.IO) {
                 try {
-                    regeocodeResult = RegeocodeQuery(
-                        LatLonPoint(bikeInfo.latitude!!, bikeInfo.longitude!!),
-                        200f,
-                        GeocodeSearch.AMAP
-                    ).await(getApplication())
+                    result = convertLatLngToPlace(
+                        getApplication(),
+                        bikeInfo.latitude!!,
+                        bikeInfo.longitude!!
+                    ).formatAddress
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(getApplication(), "网络异常", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            return regeocodeResult?.regeocodeAddress?.formatAddress
         }
-        return null
+        return result
     }
 
     fun refreshPlaceSuggestion() {
         uiScope.launch {
             withContext(Dispatchers.IO) {
                 val tipList =
-                    Inputtips(getApplication(), InputtipsQuery(uiPlace.value, "fujian")).await()
+                    uiPlace.value?.let { getSuggestionTipsList(getApplication(), it) }
                 withContext(Dispatchers.Main) {
-                    if (tipList.isNotEmpty()) {
+                    if (tipList.isNullOrEmpty()) {
+                        placeSuggestionsList.value = listOf()
+                    } else {
                         placeSuggestionsList.value = tipList.map {
                             it.district + it.name
                         }
-                    } else {
-                        placeSuggestionsList.value = listOf()
                     }
                 }
             }
         }
     }
 
-    var shouldOpenPicker = MutableLiveData<Int>()//0 for nothing.
+    var shouldOpenPicker = MutableLiveData<Int>()
 
     fun onTimeClicked(mode: Int) {
         shouldOpenPicker.value = mode
@@ -155,17 +149,17 @@ class EditBikeInfoViewModel(
         uiScope.launch {
             withContext(Dispatchers.IO) {
                 try {
+                    if (uiPlace.value.isNullOrEmpty()) {
+                        throw Exception("empty input")
+                    }
                     val placeToFormattedResult =
-                        GeocodeQuery(
-                            uiPlace.value,
-                            "fujian"
-                        ).await(getApplication()).geocodeAddressList[0]
+                        convertPlaceToAddress(getApplication(), uiPlace.value!!)
                     bikeInfo.place = uiPlace.value
                     bikeInfo.latitude = placeToFormattedResult.latLonPoint.latitude
                     bikeInfo.longitude = placeToFormattedResult.latLonPoint.longitude
                     Log.d(
                         "EditBikeInfoViewModel", "onDoneMenuClicked: " +
-                                "place have been convert to ${placeToFormattedResult.formatAddress}"
+                                "place have been convert to :${placeToFormattedResult.formatAddress}"
                     )
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
@@ -188,9 +182,7 @@ class EditBikeInfoViewModel(
                 preuiFrom.value?.let { bikeInfo.availableFrom = it.timeInMillis }
                 preuiTo.value?.let { bikeInfo.availableTo = it.timeInMillis }
                 //TODO: 上传到服务器
-                bikeInfo.infoId = System.currentTimeMillis()
                 database.bikeInfoDao.insert(bikeInfo)
-
             }
         }
     }
