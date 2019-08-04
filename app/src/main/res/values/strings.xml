@@ -14,7 +14,7 @@
     <string name="edit_to">截止时间</string>
     <string name="edit_price">价格</string>
     <string name="edit_done">完成</string>
-    <string name="required">*必填, 建议从推荐结果中选择前缀以精准定位</string>
+    <string name="required">*必填</string>
     <string name="address_not_available_retry">当前地点无法定位，请换一个试试^_^</string>
     <string name="will_show_your_contact">您在个人资料中填写的联系方式将被展示</string>
     <string name="discard_change">放弃更改?</string>

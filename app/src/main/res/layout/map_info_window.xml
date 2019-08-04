@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_window_info"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+
+    <TextView
+        android:id="@+id/tvPlace"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="14dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginRight="14dp"
+        android:textColor="@color/primaryTextColor"
+        android:textSize="14sp"
+        tools:text="福建省福州市闽侯县福州大学生活3区32号楼" />
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="9dp"
+        android:layout_marginRight="6dp"
+        android:background="#DFDFDF" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="9dp"
+        android:drawableStart="@drawable/ic_done_black_24dp"
+        android:text="@string/toolbar_add"
+        android:textSize="14sp" />
+
+
+</LinearLayout>
+

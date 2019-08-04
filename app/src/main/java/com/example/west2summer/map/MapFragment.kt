@@ -3,6 +3,8 @@ package com.example.west2summer.map
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,10 +19,17 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.amap.api.maps.AMap
 import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.MyLocationStyle
+import com.amap.api.maps.TextureMapView
+import com.amap.api.maps.model.*
+import com.example.west2summer.InfoWindowAdapter
 import com.example.west2summer.R
+import com.example.west2summer.convertLatLngToPlace
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.databinding.MapFragmentBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MapFragment : Fragment() {
@@ -29,12 +38,27 @@ class MapFragment : Fragment() {
 
     private lateinit var map: AMap
 
+    private lateinit var mapView: TextureMapView
+
+    private var centerMarker: Marker? = null
+
     private val viewModel: MapViewModel by lazy {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
         }
         ViewModelProviders.of(this, MapViewModel.Factory(activity.application))
             .get(MapViewModel::class.java)
+    }
+    private val iconYellowMarker by lazy {
+        BitmapDescriptorFactory.fromBitmap(
+            BitmapFactory
+                .decodeResource(
+                    resources,
+                    R.drawable.marker_yellow,
+                    BitmapFactory.Options().apply {
+                        inDensity = 450
+                    })
+        )
     }
 
     override fun onCreateView(
@@ -52,34 +76,69 @@ class MapFragment : Fragment() {
             refreshMarkers()
         })
 
-        binding.fab.setOnClickListener {
+        viewModel.shouldAddCenterMarker.observe(this, Observer { shouldAddCenterMarker ->
+            if (shouldAddCenterMarker) {
+                centerMarker?.remove()
+                centerMarker = map.addMarker(MarkerOptions()).apply {
+                    position = map.cameraPosition.target
+                    setIcon(iconYellowMarker)
+                    setupCenterMarkerInfoWindow()
+                }
+            } else {
+                centerMarker?.remove()
+            }
+        })
+        map.setInfoWindowAdapter(InfoWindowAdapter(context!!))
+        map.setOnCameraChangeListener(object : AMap.OnCameraChangeListener {
+            override fun onCameraChange(p0: CameraPosition?) {}
+            override fun onCameraChangeFinish(cameraPosition: CameraPosition?) {
+                if(centerMarker!=null) {
+                    centerMarker!!.position = cameraPosition?.target
+                    setupCenterMarkerInfoWindow()
+                }
+            }
+        })
+        map.setOnInfoWindowClickListener {
             navigateToAddFragment()
         }
-    }
-
-    private fun refreshMarkers() {
-        with(map) {
-            clear(true)
-            viewModel.markerMapping.value?.keys?.forEach {
-                addMarker(it)
-            }
-            setOnMarkerClickListener() {
+        map.setOnMarkerClickListener {
+            if (it!=centerMarker) {
                 findNavController().navigate(
                     MapFragmentDirections.actionMapFragmentToBikeInfoDialog(
                         viewModel.markerMapping.value!![it.options]!!
                     )
                 )
-                true
             }
+            true
+        }
+    }
+
+    private fun setupCenterMarkerInfoWindow(){
+        CoroutineScope(Dispatchers.Main).launch {
+            withContext(Dispatchers.IO) {
+                centerMarker?.title = convertLatLngToPlace(
+                    context!!,
+                    centerMarker!!.position.latitude,
+                    centerMarker!!.position.longitude
+                ).formatAddress
+            }
+            centerMarker?.showInfoWindow()
+        }
+    }
+
+    private fun refreshMarkers() {
+        map.clear(true)
+        viewModel.markerMapping.value?.keys?.forEach {
+            map.addMarker(it)
         }
     }
 
     private fun navigateToAddFragment() {
         val bikeInfo = BikeInfo(123)
-        map.myLocation?.let {
+        centerMarker?.let {
             bikeInfo.apply {
-                latitude = it.latitude
-                longitude = it.longitude
+                latitude = it.position.latitude
+                longitude = it.position.longitude
             }
         }
         findNavController().navigate(
@@ -98,7 +157,8 @@ class MapFragment : Fragment() {
             null,
             false
         )
-        map = binding.mapView.map.apply {
+        mapView = binding.mapView
+        map = mapView.map.apply {
             uiSettings?.apply {
                 isMyLocationButtonEnabled = true
                 isZoomControlsEnabled = false
@@ -112,27 +172,29 @@ class MapFragment : Fragment() {
             }
             moveCamera(CameraUpdateFactory.zoomTo(17f))
         }
-        binding.mapView.onCreate(savedInstanceState)
+
+        mapView.onCreate(savedInstanceState)
     }
+
 
     override fun onResume() {
         super.onResume()
-        binding.mapView.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        binding.mapView.onPause()
+        mapView.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        binding.mapView.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView.onDestroy()
+        mapView.onDestroy()
     }
 
     private fun requestPermission() {

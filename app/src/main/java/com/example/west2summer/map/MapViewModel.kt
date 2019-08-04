@@ -1,12 +1,14 @@
 package com.example.west2summer.map
 
 import android.app.Application
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.*
-import com.amap.api.maps.model.CameraPosition
+import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.Marker
 import com.amap.api.maps.model.MarkerOptions
+import com.example.west2summer.R
+import com.example.west2summer.User
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.database.BikeInfoRepository
 import com.example.west2summer.database.getDatabase
@@ -15,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.collections.HashMap
+import kotlin.collections.set
 
 class MapViewModel(
     application: Application
@@ -24,12 +28,25 @@ class MapViewModel(
 
     val infoList = bikeInfoRepository.bikeInfos
 
+    val iconRedMarker = BitmapDescriptorFactory.fromBitmap(
+        BitmapFactory
+            .decodeResource(
+                application.resources,
+                R.drawable.marker_red,
+                BitmapFactory.Options().apply {
+                    inDensity = 450
+                })
+    )
+
     var markerMapping = Transformations.map(infoList) {
-        val map = HashMap<MarkerOptions,BikeInfo>()
+        val map = HashMap<MarkerOptions, BikeInfo>()
         infoList.value?.let {
-            for(info in infoList.value!!) {
-                val latLng = LatLng(info.latitude!!,info.longitude!!)
+            for (info in infoList.value!!) {
+                val latLng = LatLng(info.latitude!!, info.longitude!!)
                 val markerOptions = MarkerOptions().position(latLng)
+                if (User.userId == info.ownerId) {
+                    markerOptions.icon(iconRedMarker)
+                }
                 map[markerOptions] = info
                 Log.d(
                     "MapViewModel", "refreshMarkersAndBikeInfos: " +
@@ -59,6 +76,17 @@ class MapViewModel(
                 )
             }
         }
+    }
+
+    private val _fabStatus = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+
+    val shouldAddCenterMarker: LiveData<Boolean>
+        get() = _fabStatus
+
+    fun onFabClicked() {
+        _fabStatus.value = !(_fabStatus.value!!)
     }
 
     override fun onCleared() {
