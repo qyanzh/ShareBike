@@ -13,7 +13,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.bigkoo.pickerview.builder.TimePickerBuilder
-import com.example.west2summer.AutoCompleteAdapter
 import com.example.west2summer.MainActivity
 import com.example.west2summer.R
 import com.example.west2summer.databinding.EditBikeInfoFragmentBinding
@@ -42,10 +41,14 @@ class EditBikeInfoFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            MaterialAlertDialogBuilder(context,R.style.AlertDialogTheme)
+            MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
                 .setMessage(getString(R.string.discard_change))
                 .setPositiveButton(getString(R.string.discard)) { _, _ ->
-                    findNavController().navigateUp()
+                    try {
+                        findNavController().navigateUp()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
                 .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                     dialog.dismiss()
@@ -64,13 +67,6 @@ class EditBikeInfoFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
 
-        binding.tvAutoComplete.setAdapter(
-            AutoCompleteAdapter(
-                context!!,
-                R.layout.text_auto_complete, mutableListOf<String>()
-            )
-        )
-
         (activity as MainActivity).apply {
             binding.drawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED)
             supportActionBar?.apply {
@@ -85,14 +81,6 @@ class EditBikeInfoFragment : Fragment() {
     }
 
     private fun subscribeUi() {
-        viewModel.uiPlace.observe(this, Observer {
-            viewModel.refreshPlaceSuggestion()
-        })
-
-        viewModel.placeSuggestionsList.observe(this, Observer {
-            (binding.tvAutoComplete.adapter as AutoCompleteAdapter).items = it
-        })
-
         viewModel.shouldOpenPicker.observe(this, Observer {
             hideKeyboard()
             if (it > 0) {
@@ -125,8 +113,9 @@ class EditBikeInfoFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit_done -> {
-                viewModel.onDoneMenuClicked()
-                findNavController().navigateUp()
+                if (viewModel.onDoneMenuClicked()) {
+                    findNavController().navigateUp()
+                }
             }
             android.R.id.home -> requireActivity().onBackPressed()
         }

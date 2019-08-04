@@ -47,16 +47,10 @@
                     app:helperText="@string/required">
 
 
-                    <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                        android:id="@+id/tv_auto_complete"
+                    <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:completionThreshold="1"
-                        android:minHeight="56dp"
-                        android:paddingHorizontal="12dp"
-                        android:text="@={viewModel.uiPlace}"
-                        android:textSize="15sp"
-                        tools:targetApi="o" />
+                        android:text="@={viewModel.uiPlace}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 

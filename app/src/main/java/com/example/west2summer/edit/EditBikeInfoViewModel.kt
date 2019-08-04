@@ -1,16 +1,13 @@
 package com.example.west2summer.edit
 
 import android.app.Application
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
 import com.example.west2summer.R
 import com.example.west2summer.convertLatLngToPlace
-import com.example.west2summer.convertPlaceToAddress
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.database.MyDatabase
 import com.example.west2summer.database.getDatabase
-import com.example.west2summer.getSuggestionTipsList
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,7 +33,6 @@ class EditBikeInfoViewModel(
     val uiBattery = MutableLiveData<String?>()
     val uiPrice = MutableLiveData<String?>()
     val uiNote = MutableLiveData<String?>()
-    val placeSuggestionsList = MutableLiveData<List<String>>()
 
     val preuiFrom = MutableLiveData<Calendar?>()
     val uiFrom = Transformations.map(preuiFrom) {
@@ -113,24 +109,6 @@ class EditBikeInfoViewModel(
         return result
     }
 
-    fun refreshPlaceSuggestion() {
-        uiScope.launch {
-            withContext(Dispatchers.IO) {
-                val tipList =
-                    uiPlace.value?.let { getSuggestionTipsList(getApplication(), it) }
-                withContext(Dispatchers.Main) {
-                    if (tipList.isNullOrEmpty()) {
-                        placeSuggestionsList.value = listOf()
-                    } else {
-                        placeSuggestionsList.value = tipList.map {
-                            it.district + it.name
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     var shouldOpenPicker = MutableLiveData<Int>()
 
     fun onTimeClicked(mode: Int) {
@@ -144,58 +122,46 @@ class EditBikeInfoViewModel(
         }
     }
 
+    fun onDoneMenuClicked(): Boolean {
+        if (uiPlace.value.isNullOrEmpty()) {
+            Toast.makeText(
+                getApplication(),
+                R.string.please_enter_place,
+                Toast.LENGTH_SHORT
+            ).show()
+            return false
+        } else {
+            bikeInfo.place = uiPlace.value
+        }
 
-    fun onDoneMenuClicked() {
-        uiScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    if (uiPlace.value.isNullOrEmpty()) {
-                        throw Exception("empty input")
-                    }
-                    val placeToFormattedResult =
-                        convertPlaceToAddress(getApplication(), uiPlace.value!!)
-                    bikeInfo.place = uiPlace.value
-                    bikeInfo.latitude = placeToFormattedResult.latLonPoint.latitude
-                    bikeInfo.longitude = placeToFormattedResult.latLonPoint.longitude
-                    Log.d(
-                        "EditBikeInfoViewModel", "onDoneMenuClicked: " +
-                                "place have been convert to :${placeToFormattedResult.formatAddress}"
-                    )
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            getApplication(),
-                            (R.string.address_not_available_retry),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+        if (uiBattery.value.isNullOrEmpty()) {
+            bikeInfo.battery = null
+        } else {
+            bikeInfo.battery = uiBattery.value!!.toDouble()
+        }
 
-                if (uiBattery.value.isNullOrEmpty()) {
-                    bikeInfo.battery = null
-                } else {
-                    bikeInfo.battery = uiBattery.value!!.toDouble()
-                }
+        if (uiPrice.value.isNullOrEmpty()) {
+            bikeInfo.price = null
+        } else {
+            bikeInfo.price = uiPrice.value!!.toDouble()
+        }
 
-                if (uiPrice.value.isNullOrEmpty()) {
-                    bikeInfo.price = null
-                } else {
-                    bikeInfo.price = uiPrice.value!!.toDouble()
-                }
+        if (uiNote.value.isNullOrEmpty()) {
+            bikeInfo.note = null
+        } else {
+            bikeInfo.note = uiNote.value!!
+        }
 
-                if (uiNote.value.isNullOrEmpty()) {
-                    bikeInfo.note = null
-                } else {
-                    bikeInfo.note = uiNote.value!!
-                }
-
-                bikeInfo.availableFrom = preuiFrom.value?.timeInMillis
-                bikeInfo.availableTo = preuiTo.value?.timeInMillis
-
-                //TODO: 上传到服务器
-                database.bikeInfoDao.insert(bikeInfo)
+        bikeInfo.availableFrom = preuiFrom.value?.timeInMillis
+        bikeInfo.availableTo = preuiTo.value?.timeInMillis
+        //TODO: 上传到服务器
+        CoroutineScope(Dispatchers.IO).launch {
+            database.bikeInfoDao.insert(bikeInfo)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(getApplication(), "创建成功", Toast.LENGTH_SHORT).show()
             }
         }
+        return true
     }
 
     override fun onCleared() {

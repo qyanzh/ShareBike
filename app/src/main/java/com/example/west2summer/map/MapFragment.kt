@@ -4,7 +4,6 @@ package com.example.west2summer.map
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -77,15 +76,13 @@ class MapFragment : Fragment() {
         })
 
         viewModel.shouldAddCenterMarker.observe(this, Observer { shouldAddCenterMarker ->
+            centerMarker?.remove()
             if (shouldAddCenterMarker) {
-                centerMarker?.remove()
                 centerMarker = map.addMarker(MarkerOptions()).apply {
                     position = map.cameraPosition.target
                     setIcon(iconYellowMarker)
                     setupCenterMarkerInfoWindow()
                 }
-            } else {
-                centerMarker?.remove()
             }
         })
         map.setInfoWindowAdapter(InfoWindowAdapter(context!!))
@@ -137,6 +134,7 @@ class MapFragment : Fragment() {
         val bikeInfo = BikeInfo(123)
         centerMarker?.let {
             bikeInfo.apply {
+                place = it.title
                 latitude = it.position.latitude
                 longitude = it.position.longitude
             }
@@ -146,6 +144,7 @@ class MapFragment : Fragment() {
                 bikeInfo
             )
         )
+        viewModel.onFabClicked()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
