@@ -49,18 +49,18 @@ class BikeInfoRepository(private val database: MyDatabase) {
         val now = c.timeInMillis
         c.add(Calendar.MONTH,1)
         val end = c.timeInMillis
-        for (i in 1..2) {
+        for (i in 0..1) {
             val lat = Random.nextDouble(25.704998, 25.720367)
             val lng = Random.nextDouble(
                 119.372895,
                 119.38431
             )
-            val battery = Random.nextDouble(1.toDouble(), 100.toDouble())
+            val battery = 3
             val place = convertLatLngToPlace(context, lat, lng).formatAddress
             val from = Random.nextLong(now, end)
             val to = Random.nextLong(from, end)
-            val price = Random.nextDouble(0.toDouble(), 30.toDouble())
-            val bikeInfo = BikeInfo(123, now+i, lat, lng, place, battery, from, to, price)
+            val price = 50
+            val bikeInfo = BikeInfo(123L+i, now+i, lat, lng, place, battery.toDouble(), from, to, price.toDouble())
             list.add(bikeInfo)
         }
         return list

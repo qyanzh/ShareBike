@@ -41,6 +41,11 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun hash() {
+
+    }
+
 
 }
 

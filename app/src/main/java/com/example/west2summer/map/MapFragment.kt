@@ -64,13 +64,11 @@ class MapFragment : Fragment() {
                 addMarker(it)
             }
             setOnMarkerClickListener() {
-                if (viewModel.markerMapping.value?.containsKey(it.options)!!) {
-                    findNavController().navigate(
-                        MapFragmentDirections.actionMapFragmentToEditBikeInfoFragment(
-                            viewModel.markerMapping.value!![it.options]!!
-                        )
+                findNavController().navigate(
+                    MapFragmentDirections.actionMapFragmentToBikeInfoDialog(
+                        viewModel.markerMapping.value!![it.options]!!
                     )
-                }
+                )
                 true
             }
         }

@@ -1,29 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
+        <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.example.west2summer.dialog.BikeInfoDialogViewModel" />
     </data>
 
     <LinearLayout
+        android:id="@+id/root_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:padding="24dp"
+        tools:context=".dialog.BikeInfoDialogFragment">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/dummy_image" />
+        <!--地点-->
 
-        <TextView
-            android:id="@+id/tvInfoDetail"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{viewModel.detailText}" />
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.bikeInfo.place==null ? View.GONE : View.VISIBLE}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="16dp"
+                app:srcCompat="@drawable/ic_location_on_black_24dp" />
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.bikeInfo.place}"
+                tools:text="福建省福州市闽侯县福州大学学生公寓32号楼510" />
+        </LinearLayout>
+
+        <!--电池剩余-->
+        <LinearLayout
+            android:layout_marginTop="@dimen/dialog_row_margin"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.bikeInfo.shouldShowTime() ? View.VISIBLE : View.GONE}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="16dp"
+                app:srcCompat="@drawable/ic_date_range_black_24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.bikeInfo.timeString()}"
+                tools:text="99/12/04 9:41 ~ 98/12/31 12:41" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/dialog_row_margin"
+
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.bikeInfo.battery==null ? View.GONE : View.VISIBLE}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="16dp"
+                app:srcCompat="@drawable/ic_battery_charging_full_black_24dp" />
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                tools:text="50km"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.bikeInfo.batteryString()}" />
+        </LinearLayout>
+
+        <!--时间-->
+
+
+        <!--价格-->
+        <LinearLayout
+            android:layout_marginTop="@dimen/dialog_row_margin"
+
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.bikeInfo.price==null ? View.GONE : View.VISIBLE}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="16dp"
+                app:srcCompat="@drawable/ic_iconfont_money" />
+
+            <TextView
+                tools:text="￥5.0"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.bikeInfo.priceString()}" />
+        </LinearLayout>
+
+        <!--备注-->
+        <LinearLayout
+            android:layout_marginTop="@dimen/dialog_row_margin"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.bikeInfo.note==null ? View.GONE : View.VISIBLE}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="16dp"
+                app:srcCompat="@drawable/ic_more_black_24dp" />
+
+            <TextView
+                tools:text="这是一条共享汽车的共享信息,我是这条共享信息的备注~ 三行差不多了吧,一般人不会写这么长的备注的,还差几个字我补一补."
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.bikeInfo.note}" />
+
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </layout>

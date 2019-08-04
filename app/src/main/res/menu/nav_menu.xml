@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:icon="@drawable/ic_ebike"
+        android:id="@+id/map_fragment"
+        android:checkable="true"
+        android:title="@string/app_name" />
+    <item
         android:icon="@drawable/ic_account_box_black_24dp"
         android:id="@+id/blankFragment"
         android:checkable="true"
         android:title="@string/my_info" />
     <item
         android:icon="@drawable/ic_favorite_black_24dp"
-        android:id="@+id/map_fragment"
         android:checkable="true"
         android:title="@string/my_want" />
     <item
         android:icon="@drawable/ic_history_black_24dp"
-        android:id="@+id/fragment2"
         android:checkable="true"
         android:title="@string/history_order" />
 

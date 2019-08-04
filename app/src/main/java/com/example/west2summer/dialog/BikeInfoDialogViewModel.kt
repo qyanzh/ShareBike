@@ -10,10 +10,9 @@ import kotlinx.coroutines.Job
 
 class BikeInfoDialogViewModel(
     val application: Application,
-    bikeInfo: BikeInfo
+    val bikeInfo: BikeInfo
 ) : ViewModel() {
 
-    val detailText = bikeInfo.toString()
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 

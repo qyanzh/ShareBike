@@ -49,10 +49,5 @@
         android:name="com.example.west2summer.BlankFragment"
         android:label="fragment_blank"
         tools:layout="@layout/fragment_blank" />
-    <fragment
-        android:id="@+id/fragment2"
-        android:name="com.example.west2summer.BlankFragment2"
-        android:label="fragment_blank_fragment2"
-        tools:layout="@layout/fragment_blank_fragment2" />
 
 </navigation>

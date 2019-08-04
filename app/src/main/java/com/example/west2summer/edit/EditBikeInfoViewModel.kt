@@ -170,17 +170,28 @@ class EditBikeInfoViewModel(
                         ).show()
                     }
                 }
-                if (!uiBattery.value.isNullOrEmpty()) {
+
+                if (uiBattery.value.isNullOrEmpty()) {
+                    bikeInfo.battery = null
+                } else {
                     bikeInfo.battery = uiBattery.value!!.toDouble()
                 }
-                if (!uiPrice.value.isNullOrEmpty()) {
-                    bikeInfo.battery = uiPrice.value!!.toDouble()
+
+                if (uiPrice.value.isNullOrEmpty()) {
+                    bikeInfo.price = null
+                } else {
+                    bikeInfo.price = uiPrice.value!!.toDouble()
                 }
-                if (!uiNote.value.isNullOrEmpty()) {
+
+                if (uiNote.value.isNullOrEmpty()) {
+                    bikeInfo.note = null
+                } else {
                     bikeInfo.note = uiNote.value!!
                 }
-                preuiFrom.value?.let { bikeInfo.availableFrom = it.timeInMillis }
-                preuiTo.value?.let { bikeInfo.availableTo = it.timeInMillis }
+
+                bikeInfo.availableFrom = preuiFrom.value?.timeInMillis
+                bikeInfo.availableTo = preuiTo.value?.timeInMillis
+
                 //TODO: 上传到服务器
                 database.bikeInfoDao.insert(bikeInfo)
             }
