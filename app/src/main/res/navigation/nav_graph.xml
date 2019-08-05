@@ -12,7 +12,9 @@
         tools:layout="@layout/map_fragment">
         <action
             android:id="@+id/action_map_fragment_to_bike_info_dialog"
-            app:destination="@id/bike_info_dialog" />
+            app:destination="@id/bike_info_dialog"
+            app:enterAnim="@anim/bottom_sheet_slide_in"
+            app:exitAnim="@anim/bottom_sheet_slide_out" />
         <action
             android:id="@+id/action_map_fragment_to_editBikeInfoFragment"
             app:destination="@id/editBikeInfoFragment" />
@@ -25,6 +27,9 @@
         <argument
             android:name="bikeinfo"
             app:argType="com.example.west2summer.database.BikeInfo" />
+        <action
+            android:id="@+id/action_bike_info_dialog_to_editBikeInfoFragment"
+            app:destination="@id/editBikeInfoFragment" />
     </dialog>
 
     <fragment
@@ -35,19 +40,6 @@
         <argument
             android:name="bikeinfo"
             app:argType="com.example.west2summer.database.BikeInfo" />
-        <action
-            android:id="@+id/action_addBikeInfoFragment_to_blankFragment"
-            app:destination="@id/edit_done" />
     </fragment>
-    <fragment
-        android:id="@+id/edit_done"
-        android:name="com.example.west2summer.BlankFragment"
-        android:label="fragment_blank"
-        tools:layout="@layout/fragment_blank" />
-    <fragment
-        android:id="@+id/blankFragment"
-        android:name="com.example.west2summer.BlankFragment"
-        android:label="fragment_blank"
-        tools:layout="@layout/fragment_blank" />
 
 </navigation>

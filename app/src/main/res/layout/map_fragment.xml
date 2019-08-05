@@ -24,7 +24,7 @@
             android:layout_margin="16dp"
             app:layout_anchor="@id/mapView"
             app:layout_anchorGravity="bottom|center_horizontal"
-            android:src="@{viewModel.shouldAddCenterMarker?@drawable/ic_close_black_24dp:@drawable/ic_add_black_24dp}" />
+            android:src="@{viewModel.centerMarkerIsVisible?@drawable/ic_close_black_24dp:@drawable/ic_add_black_24dp}" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

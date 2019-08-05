@@ -158,7 +158,11 @@ class EditBikeInfoViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             database.bikeInfoDao.insert(bikeInfo)
             withContext(Dispatchers.Main) {
-                Toast.makeText(getApplication(), "创建成功", Toast.LENGTH_SHORT).show()
+                if (mode == MODE_ADD) {
+                    Toast.makeText(getApplication(), "创建成功", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(getApplication(), "修改成功", Toast.LENGTH_SHORT).show()
+                }
             }
         }
         return true

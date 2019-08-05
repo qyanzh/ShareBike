@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="dialog_row_margin">16dp</dimen>
+    <dimen name="bottom_sheet_start_margin">16dp</dimen>
+    <dimen name="bottom_sheet_item_height">48dp</dimen>
 </resources>

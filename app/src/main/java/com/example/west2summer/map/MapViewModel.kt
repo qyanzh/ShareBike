@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
-import kotlin.collections.HashMap
 import kotlin.collections.set
 
 class MapViewModel(
@@ -44,7 +43,7 @@ class MapViewModel(
             for (info in infoList.value!!) {
                 val latLng = LatLng(info.latitude!!, info.longitude!!)
                 val markerOptions = MarkerOptions().position(latLng)
-                if (User.userId == info.ownerId) {
+                if (User.getCurrentUser().userId == info.ownerId) {
                     markerOptions.icon(iconRedMarker)
                 }
                 map[markerOptions] = info
@@ -82,7 +81,7 @@ class MapViewModel(
         value = false
     }
 
-    val shouldAddCenterMarker: LiveData<Boolean>
+    val centerMarkerIsVisible: LiveData<Boolean>
         get() = _fabStatus
 
     fun onFabClicked() {

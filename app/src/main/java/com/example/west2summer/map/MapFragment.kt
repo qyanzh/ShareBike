@@ -75,7 +75,7 @@ class MapFragment : Fragment() {
             refreshMarkers()
         })
 
-        viewModel.shouldAddCenterMarker.observe(this, Observer { shouldAddCenterMarker ->
+        viewModel.centerMarkerIsVisible.observe(this, Observer { shouldAddCenterMarker ->
             centerMarker?.remove()
             if (shouldAddCenterMarker) {
                 centerMarker = map.addMarker(MarkerOptions()).apply {
@@ -99,7 +99,8 @@ class MapFragment : Fragment() {
             navigateToAddFragment()
         }
         map.setOnMarkerClickListener {
-            if (it!=centerMarker) {
+            if (it != centerMarker || viewModel.centerMarkerIsVisible.value == false) {
+                map.animateCamera(CameraUpdateFactory.newLatLng(it.position))
                 findNavController().navigate(
                     MapFragmentDirections.actionMapFragmentToBikeInfoDialog(
                         viewModel.markerMapping.value!![it.options]!!
