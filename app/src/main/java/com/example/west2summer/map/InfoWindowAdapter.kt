@@ -1,12 +1,12 @@
-package com.example.west2summer
+package com.example.west2summer.map
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import com.amap.api.maps.AMap
-import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Marker
+import com.example.west2summer.R
 
 class InfoWindowAdapter(val context: Context) : AMap.InfoWindowAdapter {
 

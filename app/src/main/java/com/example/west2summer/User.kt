@@ -1,15 +1,19 @@
 package com.example.west2summer
 
-class User(val userId: Long) {
+class User(val userId: Long, val password: String) {
     companion object {
         private var me: User? = null
         fun setCurrentUser(user: User) {
             me = user
         }
 
+        fun isLogined(): Boolean {
+            return me != null
+        }
+
         fun getCurrentUser(): User {
             if (me == null) {
-                me = User(123L)
+                me = User(0L, "")
             }
             return me!!
         }

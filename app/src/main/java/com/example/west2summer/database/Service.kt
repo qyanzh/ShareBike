@@ -1,5 +1,6 @@
 package com.example.west2summer.database
 
+import com.example.west2summer.User
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Deferred
 import retrofit2.Response
@@ -24,6 +25,14 @@ interface BikeInfoService {
     @PUT("api/{infoId}")
     fun updateBikeInfoAsync(@Path(value = "infoID") infoId: Long): Deferred<Response<Void>>
 
+}
+
+fun fakeLogin(username: Long, password: String): Boolean {
+    if (password.isBlank()) {
+        throw Exception("账号密码错误")
+    }
+    User.setCurrentUser(User(username, password))
+    return true
 }
 
 object BikeInfoNetwork {

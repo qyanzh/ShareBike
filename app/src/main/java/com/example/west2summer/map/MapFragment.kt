@@ -20,7 +20,6 @@ import com.amap.api.maps.AMap
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.TextureMapView
 import com.amap.api.maps.model.*
-import com.example.west2summer.InfoWindowAdapter
 import com.example.west2summer.R
 import com.example.west2summer.convertLatLngToPlace
 import com.example.west2summer.database.BikeInfo

@@ -41,5 +41,13 @@
             android:name="bikeinfo"
             app:argType="com.example.west2summer.database.BikeInfo" />
     </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.west2summer.login.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/login_fragment" />
+    <action
+        android:id="@+id/action_global_loginFragment"
+        app:destination="@id/loginFragment" />
 
 </navigation>
