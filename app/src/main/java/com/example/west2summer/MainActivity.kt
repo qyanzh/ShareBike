@@ -4,9 +4,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.example.west2summer.databinding.ActivityMainBinding
+import com.example.west2summer.databinding.NavHeaderBinding
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,6 +17,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val navView = binding.navigationView.getHeaderView(0)
+        val navBinding = NavHeaderBinding.bind(navView)
+        navBinding.viewModel = ViewModelProviders.of(this).get(HeaderViewModel::class.java)
+        navBinding.lifecycleOwner = this
+        navBinding.invalidateAll()
         setupNavigation()
     }
 

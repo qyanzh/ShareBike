@@ -168,6 +168,17 @@ class EditBikeInfoViewModel(
         return true
     }
 
+    fun onDelete(): Boolean {
+        CoroutineScope(Dispatchers.IO).launch {
+            database.bikeInfoDao.delete(bikeInfo)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(getApplication(), "已删除", Toast.LENGTH_SHORT).show()
+            }
+        }
+        //TODO: 删除本项
+        return true
+    }
+
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()

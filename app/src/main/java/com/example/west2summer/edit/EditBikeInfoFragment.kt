@@ -110,12 +110,29 @@ class EditBikeInfoFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.getItem(0).isVisible = viewModel.mode == viewModel.MODE_EDIT
+        super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit_done -> {
                 if (viewModel.onDoneMenuClicked()) {
                     findNavController().navigateUp()
                 }
+            }
+            R.id.edit_delete -> {
+                MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+                    .setMessage("确认删除吗？本操作无法撤回")
+                    .setPositiveButton("删除") { _, _ ->
+                        if (viewModel.onDelete()) {
+                            findNavController().navigateUp()
+                        }
+                    }
+                    .setNegativeButton("取消") { dialog, _ ->
+                        dialog.dismiss()
+                    }.show()
             }
             android.R.id.home -> requireActivity().onBackPressed()
         }

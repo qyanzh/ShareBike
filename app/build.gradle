@@ -90,4 +90,7 @@ dependencies {
 
     //PickerView
     implementation 'com.contrarywind:Android-PickerView:4.1.8'
+
+    //CircleImageView
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
 }

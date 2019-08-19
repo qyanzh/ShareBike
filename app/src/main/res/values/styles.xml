@@ -60,7 +60,7 @@
 
     <style name="Widget.AppTheme.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="backgroundTint">?attr/colorPrimaryDark</item>
+        <item name="backgroundTint">?attr/colorAccent</item>
     </style>
 
     <style name="Widget.AppTheme.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">

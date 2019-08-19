@@ -36,7 +36,7 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun onFabClicked() {
+    fun onLoginClicked() {
         if (username.value.isNullOrBlank()) {
             message.value = "请输入正确账号"
         } else if (password.value.isNullOrBlank() || !password.value!!.isValidPassword()) {

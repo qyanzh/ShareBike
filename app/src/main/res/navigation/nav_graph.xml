@@ -44,7 +44,7 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.west2summer.login.LoginFragment"
-        android:label="LoginFragment"
+        android:label="@string/login"
         tools:layout="@layout/login_fragment" />
     <action
         android:id="@+id/action_global_loginFragment"

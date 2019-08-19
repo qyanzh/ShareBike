@@ -1,14 +1,27 @@
 package com.example.west2summer
 
-class User(val userId: Long, val password: String) {
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import kotlin.random.Random
+
+class User(var userId: Long, var password: String) {
     companion object {
-        private var me: User? = null
+        private var me = User(0, "")
+        val live = MutableLiveData<User>().apply {
+            value = me
+        }
         fun setCurrentUser(user: User) {
             me = user
+            me.qq = Random.nextInt().toString()
+            live.value = me
         }
 
         fun isLogined(): Boolean {
             return me != null
+        }
+
+        fun getCurrentUserLive(): LiveData<User> {
+            return live
         }
 
         fun getCurrentUser(): User {
