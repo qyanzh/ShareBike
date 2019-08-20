@@ -13,9 +13,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.bigkoo.pickerview.builder.TimePickerBuilder
-import com.example.west2summer.MainActivity
 import com.example.west2summer.R
 import com.example.west2summer.databinding.EditBikeInfoFragmentBinding
+import com.example.west2summer.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.*
 

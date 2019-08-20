@@ -38,6 +38,7 @@ class LoginFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
         subscribeUi()
+        viewModel.autoComplete()
         return binding.root
     }
 
@@ -53,5 +54,12 @@ class LoginFragment : Fragment() {
                 findNavController().navigateUp()
             }
         })
+        viewModel.shouldNavigateToRegister.observe(this, Observer { should ->
+            if (should) {
+                findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToRegisterFragment())
+                viewModel.onRegisterNavigated()
+            }
+        })
     }
+
 }

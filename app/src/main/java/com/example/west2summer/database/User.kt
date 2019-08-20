@@ -1,22 +1,21 @@
-package com.example.west2summer
+package com.example.west2summer.database
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlin.random.Random
 
-class User(var userId: Long, var password: String) {
+class User(var userId: Long) {
     companion object {
-        private var me = User(0, "")
-        val live = MutableLiveData<User>().apply {
-            value = me
-        }
+        private var me: User? = null
+        val live = MutableLiveData<User>()
+
         fun setCurrentUser(user: User) {
             me = user
-            me.qq = Random.nextInt().toString()
+            me?.qq = Random.nextInt().toString()
             live.value = me
         }
 
-        fun isLogined(): Boolean {
+        fun isLoginned(): Boolean {
             return me != null
         }
 
@@ -26,7 +25,8 @@ class User(var userId: Long, var password: String) {
 
         fun getCurrentUser(): User {
             if (me == null) {
-                me = User(0L, "")
+                me =
+                    User(0)
             }
             return me!!
         }

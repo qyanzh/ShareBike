@@ -1,8 +1,9 @@
-package com.example.west2summer
+package com.example.west2summer.main
 
 import android.util.Log
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import com.example.west2summer.database.User
 
 class HeaderViewModel : ViewModel() {
     var user = User.getCurrentUserLive()

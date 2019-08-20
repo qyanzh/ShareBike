@@ -23,6 +23,7 @@ import com.amap.api.maps.model.*
 import com.example.west2summer.R
 import com.example.west2summer.convertLatLngToPlace
 import com.example.west2summer.database.BikeInfo
+import com.example.west2summer.database.User
 import com.example.west2summer.databinding.MapFragmentBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +85,7 @@ class MapFragment : Fragment() {
                 }
             }
         })
-        map.setInfoWindowAdapter(InfoWindowAdapter(context!!))
+        map.setInfoWindowAdapter(MarkerInfoWindowAdapter(context!!))
         map.setOnCameraChangeListener(object : AMap.OnCameraChangeListener {
             override fun onCameraChange(p0: CameraPosition?) {}
             override fun onCameraChangeFinish(cameraPosition: CameraPosition?) {
@@ -131,7 +132,7 @@ class MapFragment : Fragment() {
     }
 
     private fun navigateToAddFragment() {
-        val bikeInfo = BikeInfo(123)
+        val bikeInfo = BikeInfo(User.getCurrentUser().userId)
         centerMarker?.let {
             bikeInfo.apply {
                 place = it.title

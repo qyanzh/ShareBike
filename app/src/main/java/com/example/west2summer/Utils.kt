@@ -1,7 +1,6 @@
 package com.example.west2summer
 
 import android.content.Context
-import android.util.Log
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItem

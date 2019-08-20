@@ -7,13 +7,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.west2summer.database.fakeLogin
+import com.example.west2summer.database.fakeRegister
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
-class LoginViewModel(val app: Application) : AndroidViewModel(app) {
-
-
+class RegisterViewModel(val app: Application) : AndroidViewModel(app) {
     private val viewModelJob = Job()
 
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -22,54 +21,51 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
 
     val username = MutableLiveData<String?>()
     val password = MutableLiveData<String?>()
+    val passwordConfirm = MutableLiveData<String?>()
+
+    val wechat = MutableLiveData<String?>()
+    val qq = MutableLiveData<String?>()
+    val phone = MutableLiveData<String?>()
 
     val message = MutableLiveData<String?>()
 
-    val loginSuccess = MutableLiveData<Boolean>()
-
-    fun autoComplete() {
-        if (prf.contains("username")) {
-            username.value = prf.getString("username", "")
-        }
-        if (prf.contains("password")) {
-            password.value = prf.getString("password", "")
-        }
-    }
-
-    val shouldNavigateToRegister = MutableLiveData<Boolean>()
+    val registerSuccess = MutableLiveData<Boolean>()
 
     fun onRegisterClicked() {
-        shouldNavigateToRegister.value = true
-    }
-
-    fun onRegisterNavigated() {
-        shouldNavigateToRegister.value = false
-    }
-
-    fun onLoginClicked() {
         if (username.value.isNullOrBlank()) {
-            message.value = "请输入正确学号"
+            message.value = "请输入学号"
         } else if (password.value.isNullOrBlank() || !password.value!!.isValidPassword()) {
             message.value = "请输入密码，长度不少于6位"
+        } else if (!password.value.equals(passwordConfirm.value)) {
+            message.value = "两次输入密码不一致，请重试"
+        } else if (qq.value.isNullOrBlank() && wechat.value.isNullOrBlank() && phone.value.isNullOrBlank()) {
+            message.value = "请至少填写一种联系方式"
         } else {
             try {
-                login()
+                register()
             } catch (e: Exception) {
                 message.value = e.toString()
             }
         }
     }
 
-    private fun login() {
-        //TODO: 向服务器发送登录请求
-        if (fakeLogin(username.value!!.toLong(), password.value!!)) {
-            prf.edit().apply() {
-                putString("username", username.value)
-                putString("password", password.value)
-            }.apply()
-            loginSuccess.value = true
+    private fun register() {
+        //TODO: 向服务器发送注册请求
+        if (fakeRegister()) {
+            if (fakeLogin(username.value!!.toLong(), password.value!!)) {
+                prf.edit().apply() {
+                    putString("username", username.value)
+                    putString("password", password.value)
+                }.apply()
+                registerSuccess.value = true
+            }
         }
     }
+
+    fun onRegistered() {
+        registerSuccess.value = false
+    }
+
 
     override fun onCleared() {
         super.onCleared()
@@ -83,12 +79,11 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
 
     class Factory(val app: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+            if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return LoginViewModel(app) as T
+                return RegisterViewModel(app) as T
             }
             throw IllegalArgumentException("Unable to construct viewmodel")
         }
     }
 }
-

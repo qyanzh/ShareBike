@@ -8,9 +8,9 @@ import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
 import com.example.west2summer.R
-import com.example.west2summer.User
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.database.BikeInfoRepository
+import com.example.west2summer.database.User
 import com.example.west2summer.database.getDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

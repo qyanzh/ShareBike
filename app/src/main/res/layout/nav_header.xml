@@ -5,7 +5,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.west2summer.HeaderViewModel" />
+            type="com.example.west2summer.main.HeaderViewModel" />
     </data>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

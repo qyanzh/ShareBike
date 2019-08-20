@@ -8,7 +8,7 @@ import com.amap.api.maps.AMap
 import com.amap.api.maps.model.Marker
 import com.example.west2summer.R
 
-class InfoWindowAdapter(val context: Context) : AMap.InfoWindowAdapter {
+class MarkerInfoWindowAdapter(val context: Context) : AMap.InfoWindowAdapter {
 
     override fun getInfoContents(marker: Marker?): View? {
         return null
