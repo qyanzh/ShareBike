@@ -5,11 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.User
+import com.example.west2summer.user.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlin.random.Random
 
 class BikeInfoDialogViewModel(
     val application: Application,
@@ -24,18 +23,18 @@ class BikeInfoDialogViewModel(
     }
 
     init {
-        if (bikeInfo.ownerId == User.getCurrentUser().userId) {
+        if (bikeInfo.ownerId == User.getCurrentUser()?.userId) {
             fabState.value = 2
         } else {
             //TODO: 询问服务器该用户是否想要这辆车
-            fabState.value = Random.nextInt(0, 2)
+            fabState.value = 0
         }
     }
 
     fun sendLikeRequest(): User {
         //TODO:向服务器发送想租请求，返回车主联系方式
         fabState.value = 1
-        return User.getCurrentUser()
+        return User.getCurrentUser()!!
     }
 
     fun sendUndoLikeRequest() {
@@ -44,7 +43,7 @@ class BikeInfoDialogViewModel(
 
     fun getUserContact(): User {
         //TODO:从数据库中拿出车主联系方式
-        return User.getCurrentUser()
+        return User.getCurrentUser()!!
     }
 
 

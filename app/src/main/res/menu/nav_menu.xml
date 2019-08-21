@@ -6,7 +6,7 @@
         android:checkable="true"
         android:title="@string/app_name" />
     <item
-        android:id="@id/loginFragment"
+        android:id="@id/userInfoFragment"
         android:icon="@drawable/ic_account_circle_black_24dp"
         android:checkable="true"
         android:title="@string/my_info" />

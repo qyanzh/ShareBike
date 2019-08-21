@@ -10,8 +10,8 @@ import com.amap.api.maps.model.MarkerOptions
 import com.example.west2summer.R
 import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.database.BikeInfoRepository
-import com.example.west2summer.database.User
 import com.example.west2summer.database.getDatabase
+import com.example.west2summer.user.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,7 +43,7 @@ class MapViewModel(
             for (info in infoList.value!!) {
                 val latLng = LatLng(info.latitude!!, info.longitude!!)
                 val markerOptions = MarkerOptions().position(latLng)
-                if (User.getCurrentUser().userId == info.ownerId) {
+                if (User.getCurrentUser()?.userId == info.ownerId) {
                     markerOptions.icon(iconRedMarker)
                 }
                 map[markerOptions] = info

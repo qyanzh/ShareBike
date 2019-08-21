@@ -23,8 +23,8 @@ import com.amap.api.maps.model.*
 import com.example.west2summer.R
 import com.example.west2summer.convertLatLngToPlace
 import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.User
 import com.example.west2summer.databinding.MapFragmentBinding
+import com.example.west2summer.user.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -132,7 +132,7 @@ class MapFragment : Fragment() {
     }
 
     private fun navigateToAddFragment() {
-        val bikeInfo = BikeInfo(User.getCurrentUser().userId)
+        val bikeInfo = BikeInfo(User.getCurrentUser()!!.userId)
         centerMarker?.let {
             bikeInfo.apply {
                 place = it.title

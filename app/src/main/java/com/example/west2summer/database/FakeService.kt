@@ -1,5 +1,7 @@
 package com.example.west2summer.database
 
+import com.example.west2summer.user.User
+
 fun fakeLogin(username: Long, password: String): Boolean {
     if (password.isBlank()) {
         throw Exception("账号密码错误")

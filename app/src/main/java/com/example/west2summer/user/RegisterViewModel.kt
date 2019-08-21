@@ -1,4 +1,4 @@
-package com.example.west2summer.login
+package com.example.west2summer.user
 
 import android.app.Application
 import android.content.Context
@@ -19,6 +19,7 @@ class RegisterViewModel(val app: Application) : AndroidViewModel(app) {
 
     val prf = app.getSharedPreferences("user", Context.MODE_PRIVATE)
 
+    val nickname = MutableLiveData<String?>()
     val username = MutableLiveData<String?>()
     val password = MutableLiveData<String?>()
     val passwordConfirm = MutableLiveData<String?>()
@@ -32,7 +33,9 @@ class RegisterViewModel(val app: Application) : AndroidViewModel(app) {
     val registerSuccess = MutableLiveData<Boolean>()
 
     fun onRegisterClicked() {
-        if (username.value.isNullOrBlank()) {
+        if (nickname.value.isNullOrBlank()) {
+            message.value = "请输入昵称"
+        } else if (username.value.isNullOrBlank()) {
             message.value = "请输入学号"
         } else if (password.value.isNullOrBlank() || !password.value!!.isValidPassword()) {
             message.value = "请输入密码，长度不少于6位"

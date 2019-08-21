@@ -1,24 +1,21 @@
 package com.example.west2summer.main
 
-import android.util.Log
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.example.west2summer.database.User
+import com.example.west2summer.user.User
 
 class HeaderViewModel : ViewModel() {
     var user = User.getCurrentUserLive()
     val username = Transformations.map(user) {
-        Log.d(
-            "HeaderViewModel", ": " +
-                    ""
-        )
-        user.value?.wechat
+        user.value?.let {
+            it.wechat
+        } ?: "未登录"
     }
     val phone = Transformations.map(user) {
-        Log.d(
-            "HeaderViewModel", ": " +
-                    ""
-        )
-        user.value?.phone
+        user.value?.let {
+            it.phone
+        } ?: "点击登录"
     }
+
+
 }

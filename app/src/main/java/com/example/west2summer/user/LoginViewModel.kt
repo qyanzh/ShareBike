@@ -1,4 +1,4 @@
-package com.example.west2summer.login
+package com.example.west2summer.user
 
 import android.app.Application
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.example.west2summer.login
+package com.example.west2summer.user
 
 
 import android.os.Bundle
@@ -23,7 +23,10 @@ class LoginFragment : Fragment() {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
         }
-        ViewModelProviders.of(this, LoginViewModel.Factory(activity.application))
+        ViewModelProviders.of(
+            this,
+            LoginViewModel.Factory(activity.application)
+        )
             .get(LoginViewModel::class.java)
     }
 

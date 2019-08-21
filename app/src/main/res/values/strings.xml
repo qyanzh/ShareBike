@@ -26,7 +26,6 @@
     <string name="ok">好</string>
     <string name="show_contact">查看联系方式</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="username">学号</string>
     <string name="password">密码</string>
@@ -39,4 +38,8 @@
     <string name="phone_number">手机</string>
     <string name="one_contact_way">*联系方式可只填一种</string>
     <string name="at_least_6">*至少6位</string>
+    <string name="nickname">昵称</string>
+    <string name="personal_info">个人信息</string>
+    <string name="change_password">修改密码</string>
+    <string name="cancel_register">放弃注册？</string>
 </resources>

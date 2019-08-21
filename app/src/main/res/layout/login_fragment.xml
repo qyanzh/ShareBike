@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.west2summer.login.LoginViewModel" />
+            type="com.example.west2summer.user.LoginViewModel" />
     </data>
 
     <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"

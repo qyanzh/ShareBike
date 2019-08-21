@@ -43,7 +43,7 @@
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.west2summer.login.LoginFragment"
+        android:name="com.example.west2summer.user.LoginFragment"
         android:label="@string/login"
         tools:layout="@layout/login_fragment">
         <action
@@ -56,11 +56,19 @@
         app:destination="@id/loginFragment" />
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.example.west2summer.login.RegisterFragment"
+        android:name="com.example.west2summer.user.RegisterFragment"
         android:label="@string/register"
         tools:layout="@layout/register_fragment" />
     <action
         android:id="@+id/action_global_map_fragment"
         app:destination="@id/map_fragment" />
+    <fragment
+        android:id="@+id/userInfoFragment"
+        android:name="com.example.west2summer.user.UserInfoFragment"
+        android:label="@string/personal_info"
+        tools:layout="@layout/user_info_fragment" />
+    <action
+        android:id="@+id/action_global_userInfoFragment"
+        app:destination="@id/userInfoFragment" />
 
 </navigation>

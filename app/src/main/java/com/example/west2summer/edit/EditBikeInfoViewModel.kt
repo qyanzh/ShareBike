@@ -57,7 +57,7 @@ class EditBikeInfoViewModel(
                 database = getDatabase(application)
             }
 
-//            TODO:从服务器获取infoId
+            //TODO:从服务器获取infoId
             bikeInfo.infoId ?: initBikeInfoId()
             uiPlace.value = bikeInfo.place ?: getInitUiPlace()
             with(bikeInfo) {
