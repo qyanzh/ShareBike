@@ -6,6 +6,7 @@
         android:title="@string/change_password"
         app:showAsAction="ifRoom" />
     <item
+        android:icon="@drawable/ic_done_black_24dp"
         android:id="@+id/done"
         android:title="@string/edit_done"
         app:showAsAction="ifRoom" />

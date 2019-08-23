@@ -7,6 +7,8 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.text.TextUtils
+import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItem
@@ -16,6 +18,7 @@ import com.amap.api.services.help.InputtipsQuery
 import com.amap.api.services.help.Tip
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
+import com.bumptech.glide.Glide
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import kotlin.coroutines.resume
@@ -149,4 +152,11 @@ private fun getImagePath(context: Context, uri: Uri, selection: String?): String
         cursor.close()
     }
     return path
+}
+
+@BindingAdapter("glide")
+public fun ImageView.glide(url: String?) {
+    url?.let {
+        Glide.with(this).load(url).into(this)
+    }
 }

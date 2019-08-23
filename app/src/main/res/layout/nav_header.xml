@@ -23,7 +23,7 @@
             android:layout_gravity="start"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:src="@drawable/dummy_image" />
+            android:src="@drawable/image_android_q" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

@@ -29,6 +29,8 @@ class EditBikeInfoViewModel(
     val MODE_ADD = application.resources.getString(R.string.toolbar_add)
     val MODE_EDIT = application.resources.getString(R.string.toolbar_edit)
 
+    var bikeImage = MutableLiveData<String?>()
+
     val uiPlace = MutableLiveData<String?>()
     val uiBattery = MutableLiveData<String?>()
     val uiPrice = MutableLiveData<String?>()
@@ -166,6 +168,14 @@ class EditBikeInfoViewModel(
             }
         }
         return true
+    }
+
+    fun onImagePicked(image: String) {
+        bikeImage.value = image
+    }
+
+    fun onImageCanceled() {
+        bikeImage.value = null
     }
 
     fun onDelete(): Boolean {

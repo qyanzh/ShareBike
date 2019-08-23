@@ -1,7 +1,9 @@
 package com.example.west2summer.edit
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
@@ -15,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.bigkoo.pickerview.builder.TimePickerBuilder
 import com.example.west2summer.R
 import com.example.west2summer.databinding.EditBikeInfoFragmentBinding
+import com.example.west2summer.handleImage
 import com.example.west2summer.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.*
@@ -112,6 +115,10 @@ class EditBikeInfoFragment : Fragment() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         menu.getItem(0).isVisible = viewModel.mode == viewModel.MODE_EDIT
+        Log.d(
+            "EditBikeInfoFragment", "onPrepareOptionsMenu: " +
+                    ""
+        )
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -120,6 +127,21 @@ class EditBikeInfoFragment : Fragment() {
             R.id.edit_done -> {
                 if (viewModel.onDoneMenuClicked()) {
                     findNavController().navigateUp()
+                }
+            }
+            R.id.edit_image -> {
+                if (viewModel.bikeImage.value == null) {
+                    pickImage()
+                } else {
+                    MaterialAlertDialogBuilder(
+                        context,
+                        R.style.AlertDialogTheme
+                    ).setItems(arrayOf("更换图片", "取消图片")) { _, position ->
+                        when (position) {
+                            0 -> pickImage()
+                            1 -> viewModel.onImageCanceled()
+                        }
+                    }.show()
                 }
             }
             R.id.edit_delete -> {
@@ -137,6 +159,23 @@ class EditBikeInfoFragment : Fragment() {
             android.R.id.home -> requireActivity().onBackPressed()
         }
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1) {
+            data?.let {
+                handleImage(requireContext(), data)?.let {
+                    viewModel.onImagePicked(it)
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun pickImage() {
+        val intent = Intent("android.intent.action.GET_CONTENT")
+        intent.type = "image/*"
+        startActivityForResult(intent, 1)
     }
 
     override fun onStop() {

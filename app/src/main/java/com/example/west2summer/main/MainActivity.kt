@@ -55,17 +55,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        data?.let {
-            Log.d(
-                "MainActivity", "onActivityResult: " +
-                        "$it"
-            )
-            val image = handleImage(this, data)
-            Log.d(
-                "MainActivity", "onActivityResult: " +
-                        "$image"
-            )
-            Glide.with(this).load(image).into(navBinding.navHeaderImg)
+        if (requestCode == 0) {
+            data?.let {
+                Log.d(
+                    "MainActivity", "onActivityResult: " +
+                            "$it"
+                )
+                val image = handleImage(this, data)
+                Log.d(
+                    "MainActivity", "onActivityResult: " +
+                            "$image"
+                )
+                Glide.with(this).load(image).into(navBinding.navHeaderImg)
+            }
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
