@@ -51,7 +51,7 @@
                         android:imeOptions="actionNext"
                         android:maxLength="10"
                         android:singleLine="true"
-                        android:text="@={viewModel.nickname}" />
+                        android:text="@={viewModel.name}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 

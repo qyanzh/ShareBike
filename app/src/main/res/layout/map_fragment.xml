@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <data>
-        <variable
-            name="viewModel"
-            type="com.example.west2summer.map.MapViewModel" />
-    </data>
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -14,6 +9,14 @@
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/center_marker"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:src="@drawable/ic_location_circle"
+            android:visibility="@{viewModel.centerMarkerIsVisible? View.VISIBLE:View.GONE}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
@@ -26,6 +29,15 @@
             app:layout_anchorGravity="bottom|center_horizontal"
             android:src="@{viewModel.centerMarkerIsVisible?@drawable/ic_close_black_24dp:@drawable/ic_add_black_24dp}" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.example.west2summer.main.MapViewModel" />
+    </data>
 
 
 </layout>

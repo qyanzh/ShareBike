@@ -15,6 +15,7 @@
         android:checkable="true"
         android:title="@string/my_want" />
     <item
+        android:id="@+id/orderListFragment"
         android:icon="@drawable/ic_history_black_24dp"
         android:checkable="true"
         android:title="@string/history_order" />

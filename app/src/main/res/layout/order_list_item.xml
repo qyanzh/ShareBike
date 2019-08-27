@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="8dp"
+        android:elevation="2dp"
+        android:onClick="@{()->clickListener.onClick(order)}"
+        app:cardCornerRadius="2dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/lease_out" />
+
+            <TextView
+                android:id="@+id/state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{order.finished?@string/finished:@string/using}"
+                android:textColor="@color/secondaryTextColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/finished" />
+
+            <TextView
+                android:id="@+id/id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:drawableStart="@drawable/ic_dot"
+                android:drawablePadding="4dp"
+                android:drawableTint="@color/secondaryTextColor"
+                android:gravity="center"
+                android:textColor="@color/secondaryTextColor"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title"
+                tools:text="031702420" />
+
+            <TextView
+                android:id="@+id/start_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_dot"
+                android:drawablePadding="4dp"
+                android:drawableTint="@color/dotGreen"
+                android:gravity="center"
+                android:text="@{order.formattedStartTime()}"
+                android:textColor="@color/secondaryTextColor"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/id"
+                tools:text="2019年8月27日 16:14" />
+
+            <TextView
+                android:id="@+id/end_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_dot"
+                android:drawablePadding="4dp"
+                android:drawableTint="@color/dotOrange"
+                android:gravity="center"
+                android:text="@{order.formattedEndTime()}"
+                android:textColor="@color/secondaryTextColor"
+                android:visibility="@{order.endTime!=null?View.VISIBLE:View.GONE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/start_time"
+                tools:text="2019年8月28日 16:14" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="clickListener"
+            type="com.example.west2summer.list.OrderRecordListener" />
+
+        <variable
+            name="order"
+            type="com.example.west2summer.database.OrderRecord" />
+
+    </data>
+</layout>

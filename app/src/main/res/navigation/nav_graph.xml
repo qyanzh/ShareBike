@@ -5,25 +5,19 @@
     android:id="@+id/navigation"
     app:startDestination="@id/map_fragment">
 
-    <fragment
-        android:id="@+id/map_fragment"
-        android:name="com.example.west2summer.map.MapFragment"
-        android:label="@string/app_name"
-        tools:layout="@layout/map_fragment">
-        <action
-            android:id="@+id/action_map_fragment_to_bike_info_dialog"
-            app:destination="@id/bike_info_dialog"
-            app:enterAnim="@anim/bottom_sheet_slide_in"
-            app:exitAnim="@anim/bottom_sheet_slide_out" />
-        <action
-            android:id="@+id/action_map_fragment_to_editBikeInfoFragment"
-            app:destination="@id/editBikeInfoFragment" />
-    </fragment>
+    <action
+        android:id="@+id/action_global_map_fragment"
+        app:destination="@id/map_fragment"
+        app:launchSingleTop="true" />
+    <action
+        android:id="@+id/action_global_orderListFragment"
+        app:destination="@id/orderListFragment" />
+
     <dialog
         android:id="@+id/bike_info_dialog"
-        android:name="com.example.west2summer.dialog.BikeInfoDialogFragment"
+        android:name="com.example.west2summer.dialog.BikeDialogFragment"
         android:label="BikeInfoDialogFragment"
-        tools:layout="@layout/bike_info_dialog_fragment">
+        tools:layout="@layout/bike_dialog_fragment">
         <argument
             android:name="bikeinfo"
             app:argType="com.example.west2summer.database.BikeInfo" />
@@ -31,16 +25,6 @@
             android:id="@+id/action_bike_info_dialog_to_editBikeInfoFragment"
             app:destination="@id/editBikeInfoFragment" />
     </dialog>
-
-    <fragment
-        android:id="@+id/editBikeInfoFragment"
-        android:name="com.example.west2summer.edit.EditBikeInfoFragment"
-        android:label="@string/toolbar_add"
-        tools:layout="@layout/edit_bike_info_fragment">
-        <argument
-            android:name="bikeinfo"
-            app:argType="com.example.west2summer.database.BikeInfo" />
-    </fragment>
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.west2summer.user.LoginFragment"
@@ -59,9 +43,20 @@
         android:name="com.example.west2summer.user.RegisterFragment"
         android:label="@string/register"
         tools:layout="@layout/register_fragment" />
-    <action
-        android:id="@+id/action_global_map_fragment"
-        app:destination="@id/map_fragment" />
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.example.west2summer.main.MapFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/map_fragment">
+        <action
+            android:id="@+id/action_map_fragment_to_bike_info_dialog"
+            app:destination="@id/bike_info_dialog"
+            app:enterAnim="@anim/bottom_sheet_slide_in"
+            app:exitAnim="@anim/bottom_sheet_slide_out" />
+        <action
+            android:id="@+id/action_map_fragment_to_editBikeInfoFragment"
+            app:destination="@id/editBikeInfoFragment" />
+    </fragment>
     <fragment
         android:id="@+id/userInfoFragment"
         android:name="com.example.west2summer.user.UserInfoFragment"
@@ -70,5 +65,23 @@
     <action
         android:id="@+id/action_global_userInfoFragment"
         app:destination="@id/userInfoFragment" />
+    <fragment
+        android:id="@+id/orderListFragment"
+        android:name="com.example.west2summer.list.OrderListFragment"
+        android:label="@string/history_order"
+        tools:layout="@layout/order_list_fragment">
+        <action
+            android:id="@+id/action_orderListFragment_to_bike_info_dialog"
+            app:destination="@id/bike_info_dialog" />
+    </fragment>
+    <fragment
+        android:id="@+id/editBikeInfoFragment"
+        android:name="com.example.west2summer.edit.BikeEditFragment"
+        android:label="@string/toolbar_add"
+        tools:layout="@layout/bike_edit_fragment">
+        <argument
+            android:name="bikeinfo"
+            app:argType="com.example.west2summer.database.BikeInfo" />
+    </fragment>
 
 </navigation>

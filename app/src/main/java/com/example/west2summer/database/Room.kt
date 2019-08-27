@@ -1,33 +1,14 @@
 package com.example.west2summer.database
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 
-@Dao
-interface BikeInfoDao {
-    @Query("select * from bikeinfo")
-    fun getAll(): LiveData<List<BikeInfo>>
-
-    @Query("select * from bikeinfo where infoId= :infoId")
-    fun get(infoId: Long): BikeInfo
-
-    @Query("delete from bikeinfo")
-    fun deleteAll()
-
-    @Delete
-    fun delete(bikeInfo: BikeInfo)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(bikeinfos: List<BikeInfo>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(bikeinfos: BikeInfo)
-}
-
-@Database(entities = [BikeInfo::class], version = 1)
+@Database(entities = [BikeInfo::class, OrderRecord::class], version = 1)
 abstract class MyDatabase : RoomDatabase() {
     abstract val bikeInfoDao: BikeInfoDao
+    abstract val orderRecordDao: OrderRecordDao
 }
 
 @Volatile
@@ -39,7 +20,7 @@ fun getDatabase(context: Context): MyDatabase {
             INSTANCE = Room.databaseBuilder(
                 context.applicationContext,
                 MyDatabase::class.java,
-                "bikeinfos"
+                "bike-db"
             ).build()
         }
     }

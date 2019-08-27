@@ -1,17 +1,17 @@
 package com.example.west2summer.user
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.example.west2summer.R
 import com.example.west2summer.databinding.LoginFragmentBinding
 
 
@@ -34,10 +34,7 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(
-            LayoutInflater.from(context),
-            R.layout.login_fragment, container, false
-        )
+        binding = LoginFragmentBinding.inflate(inflater)
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
         subscribeUi()
@@ -49,11 +46,11 @@ class LoginFragment : Fragment() {
         viewModel.message.observe(this, Observer {
             if (!it.isNullOrBlank()) {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.onMessageShowed()
             }
         })
         viewModel.loginSuccess.observe(this, Observer { loginSuccess ->
             if (loginSuccess) {
-                Toast.makeText(context, "登陆成功", Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()
             }
         })
@@ -63,6 +60,17 @@ class LoginFragment : Fragment() {
                 viewModel.onRegisterNavigated()
             }
         })
+    }
+
+    override fun onStop() {
+        hideKeyboard()
+        super.onStop()
+    }
+
+    private fun hideKeyboard() {
+        val inputMethodManager =
+            activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
 }

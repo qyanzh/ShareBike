@@ -6,10 +6,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.west2summer.database.fakeLogin
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import com.example.west2summer.R
+import com.example.west2summer.database.Network
+import kotlinx.coroutines.*
+import java.net.ConnectException
 
 class LoginViewModel(val app: Application) : AndroidViewModel(app) {
 
@@ -20,7 +20,7 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
 
     val prf = app.getSharedPreferences("user", Context.MODE_PRIVATE)
 
-    val username = MutableLiveData<String?>()
+    val id = MutableLiveData<String?>()
     val password = MutableLiveData<String?>()
 
     val message = MutableLiveData<String?>()
@@ -28,8 +28,8 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
     val loginSuccess = MutableLiveData<Boolean>()
 
     fun autoComplete() {
-        if (prf.contains("username")) {
-            username.value = prf.getString("username", "")
+        if (prf.contains("id")) {
+            id.value = prf.getString("id", "")
         }
         if (prf.contains("password")) {
             password.value = prf.getString("password", "")
@@ -47,7 +47,7 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     fun onLoginClicked() {
-        if (username.value.isNullOrBlank()) {
+        if (id.value.isNullOrBlank()) {
             message.value = "请输入正确学号"
         } else if (password.value.isNullOrBlank() || !password.value!!.isValidPassword()) {
             message.value = "请输入密码，长度不少于6位"
@@ -61,14 +61,34 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     private fun login() {
-        //TODO: 向服务器发送登录请求
-        if (fakeLogin(username.value!!.toLong(), password.value!!)) {
-            prf.edit().apply() {
-                putString("username", username.value)
-                putString("password", password.value)
-            }.apply()
-            loginSuccess.value = true
+        uiScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val uid = id.value!!.toLong()
+                    if (Network.service.login(uid, password.value!!).await().data == "success") {
+                        User.postCurrentUser(Network.service.getUserInfo(uid).await().user!!)
+                        prf.edit().apply() {
+                            putString("id", id.value)
+                            putString("password", password.value)
+                        }.apply()
+                        message.postValue(app.getString(R.string.login_success))
+                        loginSuccess.postValue(true)
+                    } else {
+                        throw Exception(app.getString(R.string.login_failed))
+                    }
+                } catch (e: Exception) {
+                    if (e is ConnectException) {
+                        message.postValue(app.getString(R.string.exam_network))
+                    } else {
+                        message.postValue(e.toString())
+                    }
+                }
+            }
         }
+    }
+
+    fun onMessageShowed() {
+        message.value = null
     }
 
     override fun onCleared() {

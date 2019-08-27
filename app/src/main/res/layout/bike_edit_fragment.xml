@@ -3,15 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="viewModel"
-            type="com.example.west2summer.edit.EditBikeInfoViewModel" />
-    </data>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -25,7 +16,7 @@
             android:focusableInTouchMode="true"
             android:orientation="vertical"
             android:padding="16dp"
-            tools:context=".edit.EditBikeInfoFragment">
+            tools:context=".edit.BikeEditFragment">
 
             <!--图片-->
             <LinearLayout
@@ -60,7 +51,7 @@
 
             </LinearLayout>
 
-            <!--地点-->
+            <!--标题-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,21 +62,20 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="16dp"
-                    app:srcCompat="@drawable/ic_location_on_black_24dp" />
+                    app:srcCompat="@drawable/ic_short_text_black_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.AppTheme.TextInputLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
-                    android:hint="@string/edit_place"
-                    app:helperText="@string/required">
+                    android:hint="@string/title">
 
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@={viewModel.uiPlace}" />
+                        android:text="@={viewModel.uiTitle}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -253,4 +243,13 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.example.west2summer.edit.BikeEditViewModel" />
+    </data>
 </layout>

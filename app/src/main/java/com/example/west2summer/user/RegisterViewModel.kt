@@ -2,15 +2,10 @@ package com.example.west2summer.user
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.west2summer.database.fakeLogin
-import com.example.west2summer.database.fakeRegister
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import androidx.lifecycle.*
+import com.example.west2summer.database.Network
+import kotlinx.coroutines.*
+import java.net.ConnectException
 
 class RegisterViewModel(val app: Application) : AndroidViewModel(app) {
     private val viewModelJob = Job()
@@ -19,30 +14,37 @@ class RegisterViewModel(val app: Application) : AndroidViewModel(app) {
 
     val prf = app.getSharedPreferences("user", Context.MODE_PRIVATE)
 
-    val nickname = MutableLiveData<String?>()
-    val username = MutableLiveData<String?>()
+    val name = MutableLiveData<String?>()
+    val id = MutableLiveData<String?>()
     val password = MutableLiveData<String?>()
     val passwordConfirm = MutableLiveData<String?>()
+    val address = MutableLiveData<String?>()
+    val sex = MutableLiveData<Int>()
+    val uiSex: LiveData<String> = Transformations.map(sex) {
+        if (it == 0) "男" else "女"
+    }
 
-    val wechat = MutableLiveData<String?>()
-    val qq = MutableLiveData<String?>()
-    val phone = MutableLiveData<String?>()
+    fun onSexPicked(choose: Int?) {
+        sex.value = choose
+    }
 
     val message = MutableLiveData<String?>()
 
     val registerSuccess = MutableLiveData<Boolean>()
 
     fun onRegisterClicked() {
-        if (nickname.value.isNullOrBlank()) {
+        if (name.value.isNullOrBlank()) {
             message.value = "请输入昵称"
-        } else if (username.value.isNullOrBlank()) {
+        } else if (id.value.isNullOrBlank()) {
             message.value = "请输入学号"
         } else if (password.value.isNullOrBlank() || !password.value!!.isValidPassword()) {
             message.value = "请输入密码，长度不少于6位"
         } else if (!password.value.equals(passwordConfirm.value)) {
             message.value = "两次输入密码不一致，请重试"
-        } else if (qq.value.isNullOrBlank() && wechat.value.isNullOrBlank() && phone.value.isNullOrBlank()) {
-            message.value = "请至少填写一种联系方式"
+        } else if (sex.value == null) {
+            message.value = "请选择性别"
+        } else if (address.value.isNullOrBlank()) {
+            message.value = "请输入住址"
         } else {
             try {
                 register()
@@ -53,14 +55,24 @@ class RegisterViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     private fun register() {
-        //TODO: 向服务器发送注册请求
-        if (fakeRegister()) {
-            if (fakeLogin(username.value!!.toLong(), password.value!!)) {
-                prf.edit().apply() {
-                    putString("username", username.value)
-                    putString("password", password.value)
-                }.apply()
-                registerSuccess.value = true
+        val newUser =
+            User(id.value!!.toLong(), password.value, name.value, sex.value, address.value)
+        uiScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    Network.service.register(newUser).await()
+                    prf.edit().apply() {
+                        putString("id", id.value)
+                        putString("password", password.value)
+                    }.apply()
+                    registerSuccess.postValue(true)
+                } catch (e: Exception) {
+                    if (e is ConnectException) {
+                        message.postValue("请检查网络连接")
+                    } else {
+                        message.postValue(e.toString())
+                    }
+                }
             }
         }
     }

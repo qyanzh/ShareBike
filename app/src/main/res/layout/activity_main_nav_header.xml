@@ -2,14 +2,6 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <import type="android.view.View" />
-        <variable
-            name="viewModel"
-            type="com.example.west2summer.main.HeaderViewModel" />
-    </data>
-
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,17 +40,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="@{viewModel.username}"
+                    android:text="@{viewModel.name ?? @string/not_loginned}"
                     android:textSize="20sp"
                     tools:text="The Archer" />
 
                 <TextView
-
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
 
-                    android:text="@{viewModel.phone}"
+                    android:text="@{viewModel.id ?? @string/click_to_login}"
                     android:textSize="14sp"
                     tools:text="031702420" />
             </LinearLayout>
@@ -85,4 +76,13 @@
             android:layout_height="1dp"
             android:background="@android:color/darker_gray" />
     </LinearLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.example.west2summer.main.MainNavHeaderViewModel" />
+    </data>
 </layout>

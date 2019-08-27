@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="viewModel"
-            type="com.example.west2summer.user.RegisterViewModel" />
-    </data>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -52,7 +46,7 @@
                         android:imeOptions="actionNext"
                         android:maxLength="10"
                         android:singleLine="true"
-                        android:text="@={viewModel.nickname}" />
+                        android:text="@={viewModel.name}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -80,9 +74,10 @@
 
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:inputType="number"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@={viewModel.username}" />
+                        android:text="@={viewModel.id}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
@@ -151,38 +146,42 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-
-            <!--微信-->
+            <!--性别-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:src="@{viewModel.sex==0?@drawable/ic_man_24dp:@drawable/ic_woman_24dp}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="16dp"
-                    app:srcCompat="@drawable/ic_wechat" />
+                    android:visibility="@{viewModel.sex==null?View.INVISIBLE:View.VISIBLE}"
+                    tools:src="@drawable/ic_man_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.AppTheme.TextInputLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
-                    android:hint="@string/wechat"
-                    app:helperText="@string/one_contact_way">
+                    android:hint="@string/sex">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/sex"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:imeOptions="actionNext"
                         android:singleLine="true"
-                        android:text="@={viewModel.wechat}" />
+                        android:text="@{viewModel.uiSex}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <!--QQ-->
+            <!--住址-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -193,53 +192,34 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="16dp"
-                    app:srcCompat="@drawable/ic_qq" />
+                    app:srcCompat="@drawable/ic_location_on_black_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.AppTheme.TextInputLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
-                    android:hint="@string/qq">
+                    android:hint="@string/location"
+                    app:helperText="@string/location_example">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
                         android:singleLine="true"
-                        android:text="@={viewModel.qq}" />
+                        android:text="@={viewModel.address}" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <!--价格-->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="16dp"
-                    app:srcCompat="@drawable/ic_phone_black_24dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.AppTheme.TextInputLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:hint="@string/phone_number">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:singleLine="true"
-                        android:text="@={viewModel.phone}" />
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.example.west2summer.user.RegisterViewModel" />
+    </data>
 </layout>

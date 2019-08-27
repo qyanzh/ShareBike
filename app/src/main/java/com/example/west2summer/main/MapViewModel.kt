@@ -1,17 +1,13 @@
-package com.example.west2summer.map
+package com.example.west2summer.main
 
 import android.app.Application
-import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.*
-import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
-import com.example.west2summer.R
 import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.BikeInfoRepository
+import com.example.west2summer.database.Repository
 import com.example.west2summer.database.getDatabase
-import com.example.west2summer.user.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,30 +19,22 @@ class MapViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val bikeInfoRepository = BikeInfoRepository(getDatabase(application))
+    private val repository = Repository(getDatabase(application))
 
-    val infoList = bikeInfoRepository.bikeInfos
-
-    val iconRedMarker = BitmapDescriptorFactory.fromBitmap(
-        BitmapFactory
-            .decodeResource(
-                application.resources,
-                R.drawable.marker_red,
-                BitmapFactory.Options().apply {
-                    inDensity = 450
-                })
-    )
+    val infoList = repository.bikeInfos
 
     var markerMapping = Transformations.map(infoList) {
+        Log.d(
+            "MapViewModel", ": " +
+                    "${infoList.value}"
+        )
         val map = HashMap<MarkerOptions, BikeInfo>()
         infoList.value?.let {
             for (info in infoList.value!!) {
-                val latLng = LatLng(info.latitude!!, info.longitude!!)
+                val latLng = LatLng(info.lat, info.lng)
                 val markerOptions = MarkerOptions().position(latLng)
-                if (User.getCurrentUser()?.userId == info.ownerId) {
-                    markerOptions.icon(iconRedMarker)
-                }
                 map[markerOptions] = info
+
                 Log.d(
                     "MapViewModel", "refreshMarkersAndBikeInfos: " +
                             "added marker$markerOptions"
@@ -67,7 +55,7 @@ class MapViewModel(
     private fun refreshDataFromRepository() {
         uiScope.launch {
             try {
-                bikeInfoRepository.fakeRefreshBikeInfos(getApplication())
+//                repository.fakeRefreshBikeInfos(getApplication())
             } catch (networkError: IOException) {
                 Log.d(
                     "MapViewModel", "refreshDataFromRepository: " +

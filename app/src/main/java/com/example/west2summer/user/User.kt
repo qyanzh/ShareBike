@@ -2,37 +2,44 @@ package com.example.west2summer.user
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import kotlin.random.Random
+import com.squareup.moshi.Json
 
-class User(var userId: Long) {
+data class User(
+    val id: Long,
+    val password: String? = null,
+    var name: String? = null,
+    var sex: Int? = null,
+    var address: String? = null,
+    @field:Json(name = "contact_wechat")
+    var wechat: String? = null,
+    @field:Json(name = "contact_qq")
+    var qq: String? = null,
+    @field:Json(name = "contact_phone")
+    var phone: String? = null
+) {
     companion object {
-        private var me: User? = null
-        val live = MutableLiveData<User?>().apply {
-            value = me
+
+        @Transient
+        private val _currentUser = MutableLiveData<User>().apply {
+            value = null
+        }
+        val currentUser: LiveData<User>
+            get() = _currentUser
+
+        fun setCurrentUser(user: User) {
+            _currentUser.value = user
         }
 
-        fun setCurrentUser(user: User?) {
-            me = user
-            me?.qq = Random.nextInt().toString()
-            live.value =
-                me
+        fun postCurrentUser(user: User) {
+            _currentUser.postValue(user)
         }
 
         fun isLoginned(): Boolean {
-            return me != null
+            return _currentUser.value != null
         }
 
-        fun getCurrentUserLive(): LiveData<User?> {
-            return live
-        }
-
-        fun getCurrentUser(): User? {
-            return me
+        fun logout() {
+            _currentUser.value = null
         }
     }
-
-    var nickname: String? = null
-    var qq: String? = "10000"
-    val wechat: String? = "z991204-"
-    val phone: String? = "18150632336"
 }

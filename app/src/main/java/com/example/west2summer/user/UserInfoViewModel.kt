@@ -14,23 +14,35 @@ class UserInfoViewModel : ViewModel() {
 
 //    val prf = app.getSharedPreferences("user", Context.MODE_PRIVATE)
 
-//    val username = MutableLiveData<String?>()
+//    val id = MutableLiveData<String?>()
 
 
-    val nickname = MutableLiveData<String?>()
+    val name = MutableLiveData<String?>()
     val wechat = MutableLiveData<String?>()
     val qq = MutableLiveData<String?>()
     val phone = MutableLiveData<String?>()
 
     init {
         Log.d(
-            "UserInfoViewModel", "${User.getCurrentUser()?.wechat}: " +
+            "UserInfoViewModel", "${User.currentUser.value?.wechat}: " +
                     ""
         )
-        nickname.value = User.getCurrentUser()?.nickname
-        wechat.value = User.getCurrentUser()?.wechat
-        qq.value = User.getCurrentUser()?.qq
-        phone.value = User.getCurrentUser()?.phone
+        name.value = User.currentUser.value?.name
+        wechat.value = User.currentUser.value?.wechat
+        qq.value = User.currentUser.value?.qq
+        phone.value = User.currentUser.value?.phone
+    }
+
+    fun onDoneClicked() {
+        if (name.value.isNullOrBlank()) {
+            message.value = "请输入昵称"
+        } else {
+            try {
+                //TODO:更新个人信息
+            } catch (e: Exception) {
+                message.value = e.toString()
+            }
+        }
     }
 
 
