@@ -18,13 +18,13 @@ import androidx.navigation.NavGraph;
 import androidx.navigation.NavOptions;
 
 import com.example.west2summer.R;
-import com.example.west2summer.user.User;
+import com.example.west2summer.source.User;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import java.lang.ref.WeakReference;
 
-public class MyNavigationUI {
+public final class MyNavigationUI {
 
     public static void setupWithNavController(@NonNull final NavigationView navigationView,
                                               @NonNull final NavController navController) {
@@ -78,14 +78,20 @@ public class MyNavigationUI {
         }
         NavOptions options = builder.build();
         try {
-            //TODO provide proper API instead of using Exceptions as Control-Flow.
-            if (User.Companion.isLoginned()) {
-                navController.navigate(item.getItemId(), null, options);
-            } else {
-                if (item.getItemId() != R.id.map_fragment) {
-                    navController.navigate(R.id.loginFragment, null, options);
+            NavDestination currentDes = navController.getCurrentDestination();
+            if (currentDes != null) {
+                int currentId = currentDes.getId();
+                if (currentId == item.getItemId()) {
+                    return true;
                 } else {
-                    navController.navigateUp();
+                    if (item.getItemId() != R.id.map_fragment) {
+                        if (!User.Companion.isLoginned())
+                            navController.navigate(R.id.loginFragment, null, options);
+                        else
+                            navController.navigate(item.getItemId(), null, options);
+                    } else {
+                        navController.navigateUp();
+                    }
                 }
             }
             return true;

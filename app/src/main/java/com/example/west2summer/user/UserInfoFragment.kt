@@ -2,22 +2,25 @@ package com.example.west2summer.user
 
 import android.os.Bundle
 import android.view.*
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import com.example.west2summer.R
 import com.example.west2summer.component.EditBaseFragment
+import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.UserInfoFragmentBinding
-import com.example.west2summer.main.MainActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class UserInfoFragment : EditBaseFragment() {
 
     private lateinit var binding: UserInfoFragmentBinding
+
     private val viewModel: UserInfoViewModel by lazy {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
         }
         ViewModelProviders.of(
-            this
+            this, UserInfoViewModel.Factory(activity.application)
         ).get(UserInfoViewModel::class.java)
     }
 
@@ -27,13 +30,37 @@ class UserInfoFragment : EditBaseFragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = UserInfoFragmentBinding.inflate(inflater)
-        (activity as MainActivity).apply {
-            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-            supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close_black_24dp)
-        }
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
+        subscribeUi()
         return binding.root
+    }
+
+    private fun subscribeUi() {
+        binding.sex.setOnClickListener {
+            hideKeyboard()
+            MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+                .setTitle(getString(R.string.please_choose_sex))
+                .setItems(
+                    arrayOf(getString(R.string.man), getString(R.string.woman))
+                ) { _, position ->
+                    viewModel.onSexPicked(position)
+                }.show()
+        }
+        viewModel.message.observe(this, Observer {
+            it?.let {
+                toast(context!!, it)
+                viewModel.onMessageShowed()
+            }
+        })
+        viewModel.modifySuccess.observe(this, Observer { success ->
+            success?.let {
+                if (success) {
+                    findNavController().navigateUp()
+                    viewModel.onModifySuccess()
+                }
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -43,9 +70,8 @@ class UserInfoFragment : EditBaseFragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.edit_done -> {
+            R.id.modify_done -> {
                 viewModel.onDoneClicked()
-                //TODO:提交个人信息
             }
             R.id.change_password -> {
                 //TODO:修改密码

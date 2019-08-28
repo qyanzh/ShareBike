@@ -1,4 +1,4 @@
-package com.example.west2summer
+package com.example.west2summer.AutoComplete
 
 import android.content.Context
 import android.view.LayoutInflater

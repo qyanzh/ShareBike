@@ -20,7 +20,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.west2summer.R
 import com.example.west2summer.component.LikeFabState
 import com.example.west2summer.databinding.BikeDialogFragmentBinding
-import com.example.west2summer.user.User
+import com.example.west2summer.source.User
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

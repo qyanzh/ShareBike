@@ -1,29 +1,11 @@
 package com.example.west2summer
 
-import android.content.Context
-import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.base.MainThread
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
-import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.BikeInfoDao
-import com.example.west2summer.database.MyDatabase
-import com.example.west2summer.database.getDatabase
-import org.junit.After
-
-import org.junit.Test
+import com.example.west2summer.source.Service
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Rule
-import org.mockito.Mockito.mock
-import java.io.IOException
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -32,33 +14,16 @@ import java.io.IOException
  */
 @RunWith(AndroidJUnit4::class)
 class SimpleEntityReadWriteTest {
-    private lateinit var dao: BikeInfoDao
-    private lateinit var db: MyDatabase
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://uri.amap.com/marker")
+        .addConverterFactory(MoshiConverterFactory.create())
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
+        .build()
 
-    @Before
-    fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(
-            context, MyDatabase::class.java).build()
-        dao = db.bikeInfoDao
-    }
+    val bikeInfoService = retrofit.create(Service::class.java)
 
-    @After
-    @Throws(IOException::class)
-    fun closeDb() {
-        db.close()
-    }
 
-    @Test
-    @Throws(Exception::class)
-    fun writeUserAndReadInList() {
-        val bikeInfo = BikeInfo(1,2)
-        val byName = dao.getAll()
-        val lifecycle = LifecycleRegistry(mock(LifecycleOwner::class.java))
 
-        for(i in 1..10) {
-            dao.insert(BikeInfo(i.toLong(),i.toLong()))
-        }
-    }
+
 
 }

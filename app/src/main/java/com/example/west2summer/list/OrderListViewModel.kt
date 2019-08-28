@@ -4,10 +4,10 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.Repository
-import com.example.west2summer.database.getDatabase
-import com.example.west2summer.user.User
+import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.Repository
+import com.example.west2summer.source.User
+import com.example.west2summer.source.getDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

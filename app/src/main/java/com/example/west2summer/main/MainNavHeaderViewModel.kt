@@ -3,7 +3,7 @@ package com.example.west2summer.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.example.west2summer.user.User
+import com.example.west2summer.source.User
 
 class MainNavHeaderViewModel : ViewModel() {
     var user: LiveData<User> = User.currentUser

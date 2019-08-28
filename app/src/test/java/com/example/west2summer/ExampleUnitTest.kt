@@ -1,8 +1,8 @@
 package com.example.west2summer
 
 import com.example.west2summer.component.toMD5
-import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.user.User
+import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.NetworkUser
 import com.squareup.moshi.Moshi
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -51,12 +51,14 @@ class ExampleUnitTest {
 
         val moshi = Moshi.Builder().build()
 
-        val userAdapter = moshi.adapter(User::class.java)
+        val userAdapter = moshi.adapter(NetworkUser::class.java)
+
+        val test = NetworkUser(0, "", null, "")
 
 
-        val user = User(1L, "pass", "zhang", 1, "add", wechat = "123")
-
-        val json = userAdapter.toJson(user)
+        val json = """
+            {"msg":"","ok":"","status":0,"data":null}
+            """.trimIndent()
 
         println(json)
 
@@ -69,5 +71,17 @@ class ExampleUnitTest {
     }
 
 
-}
+    data class User(var id: Long)
 
+    @Test
+    fun live() {
+        val data = User(123L)
+        val copy = data.copy()
+        print(data === copy)
+
+        val data2 = User(123L)
+        val copy2 = data.copy(456L)
+        print(data2.hashCode() == copy2.hashCode())
+    }
+
+}

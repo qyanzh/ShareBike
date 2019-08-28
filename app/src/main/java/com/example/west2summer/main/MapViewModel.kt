@@ -5,9 +5,9 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
-import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.Repository
-import com.example.west2summer.database.getDatabase
+import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.Repository
+import com.example.west2summer.source.getDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,10 +24,6 @@ class MapViewModel(
     val infoList = repository.bikeInfos
 
     var markerMapping = Transformations.map(infoList) {
-        Log.d(
-            "MapViewModel", ": " +
-                    "${infoList.value}"
-        )
         val map = HashMap<MarkerOptions, BikeInfo>()
         infoList.value?.let {
             for (info in infoList.value!!) {

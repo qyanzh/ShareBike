@@ -8,6 +8,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItem
@@ -18,6 +19,8 @@ import com.amap.api.services.help.Tip
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
@@ -29,6 +32,23 @@ import kotlin.coroutines.suspendCoroutine
 
 var shortTimeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
 var longTimeFormatter = SimpleDateFormat("yyyy年MM月dd日 HH:mm", Locale.getDefault())
+
+fun toast(context: Context, msg: String) {
+    if (!msg.isBlank()) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+}
+
+suspend fun toastUiScope(context: Context, msg: String) {
+    withContext(Dispatchers.Main) {
+        toast(context, msg)
+    }
+}
+
+fun String.isValidPassword(): Boolean {
+    if (length < 6) return false
+    return true
+}
 
 enum class LikeFabState {
     UNLIKE, LIKED, EDIT

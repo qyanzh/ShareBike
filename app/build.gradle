@@ -19,6 +19,9 @@ android {
         exclude 'META-INF/library-core_release.kotlin_module'
     }
     defaultConfig {
+        ndk{
+            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a"
+        }
         applicationId "com.example.west2summer"
         minSdkVersion 21
         targetSdkVersion 29
@@ -61,8 +64,10 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.2.0-alpha01'
 
     //Amap
-    implementation files('libs/AMap3DMap_6.9.2_AMapSearch_6.9.2_20190709.jar')
-
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.amap.api:3dmap:6.9.2'
+    implementation 'com.amap.api:search:6.9.2'
+    implementation 'com.amap.api:location:4.7.0'
 
     //Room
     def room_version = "2.2.0-beta01" // 2.1.0 for latest stable version

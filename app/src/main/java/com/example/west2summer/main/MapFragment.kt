@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,9 +22,9 @@ import com.amap.api.maps.TextureMapView
 import com.amap.api.maps.model.*
 import com.example.west2summer.R
 import com.example.west2summer.component.convertLatLngToPlace
-import com.example.west2summer.database.BikeInfo
 import com.example.west2summer.databinding.MapFragmentBinding
-import com.example.west2summer.user.User
+import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,10 +75,6 @@ class MapFragment : Fragment() {
             }
         }
         mapView.onCreate(savedInstanceState)
-        Log.d(
-            "MapFragment", "onCreate: " +
-                    "$mapView" + " $map"
-        )
     }
 
     override fun onCreateView(
@@ -142,7 +137,7 @@ class MapFragment : Fragment() {
             if (User.isLoginned()) {
                 navigateToAddFragment()
             } else {
-                Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.please_login), Toast.LENGTH_SHORT).show()
                 findNavController().navigate(MapFragmentDirections.actionGlobalLoginFragment())
             }
         }
@@ -217,8 +212,8 @@ class MapFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         mapView.onDestroy()
+        super.onDestroy()
     }
 
     private fun requestPermission() {

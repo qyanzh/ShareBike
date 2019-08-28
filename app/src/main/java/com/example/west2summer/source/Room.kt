@@ -1,4 +1,4 @@
-package com.example.west2summer.database
+package com.example.west2summer.source
 
 import android.content.Context
 import androidx.room.Database

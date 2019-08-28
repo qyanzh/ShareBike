@@ -19,6 +19,6 @@
 
         <variable
             name="bikeinfo"
-            type="com.example.west2summer.database.BikeInfo" />
+            type="com.example.west2summer.source.BikeInfo" />
     </data>
 </layout>

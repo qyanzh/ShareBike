@@ -7,11 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.west2summer.component.LikeFabState
-import com.example.west2summer.database.BikeInfo
-import com.example.west2summer.database.OrderRecord
-import com.example.west2summer.database.Repository
-import com.example.west2summer.database.getDatabase
-import com.example.west2summer.user.User
+import com.example.west2summer.source.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

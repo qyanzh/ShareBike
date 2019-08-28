@@ -1,56 +1,43 @@
-package com.example.west2summer.database
+package com.example.west2summer.source
 
 import com.example.west2summer.BuildConfig
-import com.example.west2summer.user.User
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Json
 import kotlinx.coroutines.Deferred
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 
 interface Service {
 
+    /* 注册 */
+    @POST("api/ev_user/register")
+    fun registerAsync(@Body user: User): Deferred<NetworkUser>
+
+    /* 登录 */
     @FormUrlEncoded
     @POST("api/ev_user/login")
-    fun login(@Field("id") id: Long, @Field("password") password: String): Deferred<NetworkResponse>
+    fun loginAsync(@Field("id") id: Long, @Field("password") password: String): Deferred<NetworkResponse>
 
+    /* 个人信息*/
     @GET("api/query/ev_user/id/{id}")
-    fun getUserInfo(@Path("id") id: Long): Deferred<NetworkUser>
+    fun getUserInfoAsync(@Path("id") id: Long): Deferred<NetworkUser>
 
-    @POST("api/ev_user/register")
-    fun register(@Body user: User): Deferred<NetworkUser>
+    /* 更新个人信息 */
+    @POST("api/ev_user/update")
+    fun updateUserAsync(@Body user: User): Deferred<NetworkUser>
+
+
+    /* 开发*/
+    @GET("api/query/ev_user/all")
+    fun getAllUserAsync(): Deferred<NetworkResponse>
 
     @FormUrlEncoded
     @POST("api/ev_user/delete")
-    fun deleteUser(@Field("id") id: Long): Deferred<NetworkResponse>
+    fun deleteUserAsync(@Field("id") id: Long): Deferred<NetworkResponse>
 
-    @GET("api/query/ev_user/all")
-    fun getAllUser(): Deferred<NetworkResponse>
-
-    @GET("api")
-    fun getBikeInfoAsnc(): Deferred<BikeInfo?>
-
-    @GET("api")
-    fun getBikeInfoListAsnc(): Deferred<List<BikeInfo>>
-
-    @POST("api")
-    fun uploadBikeInfoAsync(@Body newBikeInfo: BikeInfo): Deferred<Response<Void>>
-
-    @DELETE("api/{infoId}")
-    fun deleteBikeInfoAsync(@Path("infoID") infoId: Long): Deferred<Response<Void>>
-
-    @PUT("api/{infoId}")
-    fun updateBikeInfoAsync(@Path(value = "infoID") infoId: Long): Deferred<Response<Void>>
-
-    @GET("api")
-    fun getOrderRecordListAsnc(): Deferred<List<OrderRecord>>
-
-    @POST("api")
-    fun uploadOrderRecordAsync(@Body newOrderRecord: OrderRecord): Deferred<Response<Void>>
 }
 
 

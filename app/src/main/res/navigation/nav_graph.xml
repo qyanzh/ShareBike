@@ -20,7 +20,7 @@
         tools:layout="@layout/bike_dialog_fragment">
         <argument
             android:name="bikeinfo"
-            app:argType="com.example.west2summer.database.BikeInfo" />
+            app:argType="com.example.west2summer.source.BikeInfo" />
         <action
             android:id="@+id/action_bike_info_dialog_to_editBikeInfoFragment"
             app:destination="@id/editBikeInfoFragment" />
@@ -33,7 +33,9 @@
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment"
-            app:launchSingleTop="true" />
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/map_fragment"
+            app:popUpToInclusive="false" />
     </fragment>
     <action
         android:id="@+id/action_global_loginFragment"
@@ -81,7 +83,7 @@
         tools:layout="@layout/bike_edit_fragment">
         <argument
             android:name="bikeinfo"
-            app:argType="com.example.west2summer.database.BikeInfo" />
+            app:argType="com.example.west2summer.source.BikeInfo" />
     </fragment>
 
 </navigation>

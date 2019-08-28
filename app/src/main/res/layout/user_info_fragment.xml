@@ -3,13 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="com.example.west2summer.user.UserInfoViewModel" />
-    </data>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -24,8 +17,40 @@
             android:padding="16dp"
             tools:context=".user.UserInfoFragment">
 
-            <!--昵称-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="16dp"
+                    android:src="@{viewModel.sex==0?@drawable/ic_man_24dp:@drawable/ic_woman_24dp}"
+                    android:visibility="@{viewModel.sex==null?View.INVISIBLE:View.VISIBLE}"
+                    tools:src="@drawable/ic_man_24dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.AppTheme.TextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:hint="@string/sex">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/sex"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:imeOptions="actionNext"
+                        android:singleLine="true"
+                        android:text="@{viewModel.uiSex}" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+            <!--昵称-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,6 +80,48 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
+            <!--性别-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="16dp"
+                    app:srcCompat="@drawable/ic_location_on_black_24dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.AppTheme.TextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:hint="@string/location">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:text="@={viewModel.address}" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!--住址-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="@string/basic_info"
+                android:textColor="@color/secondaryTextColor" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="@string/contact_way"
+                android:textColor="@color/secondaryTextColor" />
 
             <!--微信-->
             <LinearLayout
@@ -145,5 +212,14 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.example.west2summer.user.UserInfoViewModel" />
+    </data>
 
 </layout>

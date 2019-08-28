@@ -12,7 +12,7 @@ import com.example.west2summer.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
-open class EditBaseFragment : Fragment() {
+abstract class EditBaseFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -39,7 +39,6 @@ open class EditBaseFragment : Fragment() {
             binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close_black_24dp)
         }
-
     }
 
     override fun onStop() {

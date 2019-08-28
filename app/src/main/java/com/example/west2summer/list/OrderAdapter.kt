@@ -5,9 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.west2summer.database.OrderRecord
 import com.example.west2summer.databinding.OrderListItemBinding
-import com.example.west2summer.user.User
+import com.example.west2summer.source.OrderRecord
+import com.example.west2summer.source.User
 
 class OrderAdapter(val clickListener: OrderRecordListener) :
     ListAdapter<OrderRecord, OrderAdapter.ViewHolder>(OrderRecordDiffCallback()) {
