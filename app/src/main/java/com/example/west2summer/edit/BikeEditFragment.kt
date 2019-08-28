@@ -9,13 +9,11 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.bigkoo.pickerview.builder.TimePickerBuilder
 import com.example.west2summer.R
-import com.example.west2summer.component.EditBaseFragment
-import com.example.west2summer.component.EditState
-import com.example.west2summer.component.REQUEST_BIKE_IMAGE
-import com.example.west2summer.component.handleImage
+import com.example.west2summer.component.*
 import com.example.west2summer.databinding.BikeEditFragmentBinding
 import com.example.west2summer.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 import java.util.*
 
 class BikeEditFragment : EditBaseFragment() {
@@ -30,7 +28,8 @@ class BikeEditFragment : EditBaseFragment() {
             this,
             BikeEditViewModel.Factory(
                 activity.application,
-                BikeEditFragmentArgs.fromBundle(arguments!!).bikeinfo
+                BikeEditFragmentArgs.fromBundle(arguments!!).bikeinfo,
+                BikeEditFragmentArgs.fromBundle(arguments!!).bikeIndex
             )
         )
             .get(BikeEditViewModel::class.java)
@@ -58,6 +57,12 @@ class BikeEditFragment : EditBaseFragment() {
     }
 
     private fun subscribeUi() {
+        viewModel.message.observe(this, Observer {
+            it?.let {
+                toast(context!!, it)
+                viewModel.onMessageShowed()
+            }
+        })
         viewModel.shouldOpenPicker.observe(this, Observer {
             hideKeyboard()
             if (it > 0) {
@@ -93,8 +98,10 @@ class BikeEditFragment : EditBaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit_done -> {
-                if (viewModel.onDoneMenuClicked()) {
-                    findNavController().navigateUp()
+                viewModel.uiScope.launch {
+                    if (viewModel.onDoneMenuClicked()) {
+                        findNavController().navigateUp()
+                    }
                 }
             }
             R.id.edit_image -> {
@@ -116,8 +123,10 @@ class BikeEditFragment : EditBaseFragment() {
                 MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
                     .setMessage("确认删除吗？本操作无法撤回")
                     .setPositiveButton("删除") { _, _ ->
-                        if (viewModel.onDelete()) {
-                            findNavController().navigateUp()
+                        viewModel.uiScope.launch {
+                            if (viewModel.onDelete()) {
+                                findNavController().navigateUp()
+                            }
                         }
                     }
                     .setNegativeButton("取消") { dialog, _ ->

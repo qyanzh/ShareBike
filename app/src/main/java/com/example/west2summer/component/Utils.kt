@@ -10,6 +10,7 @@ import android.text.TextUtils
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
+import androidx.lifecycle.MutableLiveData
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItem
 import com.amap.api.services.geocoder.*
@@ -33,6 +34,10 @@ import kotlin.coroutines.suspendCoroutine
 var shortTimeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
 var longTimeFormatter = SimpleDateFormat("yyyy年MM月dd日 HH:mm", Locale.getDefault())
 
+fun <T> MutableLiveData<T>.notifyObserver() {
+    this.postValue(this.value)
+}
+
 fun toast(context: Context, msg: String) {
     if (!msg.isBlank()) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
@@ -51,7 +56,7 @@ fun String.isValidPassword(): Boolean {
 }
 
 enum class LikeFabState {
-    UNLIKE, LIKED, EDIT
+    UNLIKE, LIKED, EDIT, NULL
 }
 
 enum class EditState {

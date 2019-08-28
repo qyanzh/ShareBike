@@ -39,7 +39,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
             this,
             BikeDialogViewModel.Factory(
                 activity.application,
-                BikeDialogFragmentArgs.fromBundle(arguments!!).bikeinfo
+                BikeDialogFragmentArgs.fromBundle(arguments!!).bikeIndex
             )
         ).get(BikeDialogViewModel::class.java)
     }
@@ -79,11 +79,6 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
             )
         }
 
-
-//        dialog.window!!.setGravity(Gravity.BOTTOM)
-
-//        BottomSheetBehavior.from(view).peekHeight = height + 70
-
         return dialog
     }
 
@@ -104,6 +99,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
         viewModel.fabState.observe(this, Observer { state ->
             binding.fab.setImageResource(
                 when (state) {
+                    LikeFabState.NULL -> R.drawable.ic_favorite_border_black_24dp
                     LikeFabState.UNLIKE -> R.drawable.ic_favorite_border_black_24dp
                     LikeFabState.LIKED -> R.drawable.ic_favorite_black_24dp
                     else -> R.drawable.ic_mode_edit_black_24dp
@@ -113,11 +109,14 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
         binding.fab.setOnClickListener {
             if (User.isLoginned()) {
                 when (viewModel.fabState.value) {
+                    LikeFabState.NULL -> {
+                    }
                     LikeFabState.UNLIKE -> showLikeDialog()
                     LikeFabState.LIKED -> undoLike()
                     else -> findNavController().navigate(
                         BikeDialogFragmentDirections.actionBikeInfoDialogToEditBikeInfoFragment(
-                            viewModel.bikeInfo
+                            viewModel.bikeInfo,
+                            viewModel.bikeIndex
                         )
                     )
                 }

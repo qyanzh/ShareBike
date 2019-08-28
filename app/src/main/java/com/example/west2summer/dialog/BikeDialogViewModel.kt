@@ -7,7 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.west2summer.component.LikeFabState
-import com.example.west2summer.source.*
+import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.Repository
+import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,39 +18,17 @@ import org.jetbrains.annotations.TestOnly
 
 class BikeDialogViewModel(
     val application: Application,
-    val bikeInfo: BikeInfo
+    val bikeIndex: Int
 ) : ViewModel() {
-
-    @TestOnly
-    fun addRecord() {
-        uiScope.launch {
-            Log.d(
-                "BikeDialogViewModel", "addRecord: " +
-                        "${bikeInfo.bikeId}"
-            )
-            repository.insertOrderRecord(
-                OrderRecord(
-                    bikeInfo.bikeId!!,
-                    bikeInfo.ownerId!!,
-                    User.currentUser.value?.id!!
-                ).apply {
-                    id = System.currentTimeMillis()
-                    isUsed = true
-                    startTime = System.currentTimeMillis()
-                    endTime = System.currentTimeMillis() + 12312414L
-                })
-        }
-    }
-
-    //TODO: move to repository
-    private val repository = Repository(getDatabase(application))
+    val bikeInfo: BikeInfo = Repository.bikeList.value!![bikeIndex]!!
 
     private val viewModelJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
     val owner = User.currentUser
 
     private val _fabState = MutableLiveData<LikeFabState?>()
+
     val fabState: LiveData<LikeFabState?>
         get() = _fabState
 
@@ -59,6 +39,28 @@ class BikeDialogViewModel(
             //TODO: 询问服务器该用户是否想要这辆车
             _fabState.value = LikeFabState.LIKED
             _fabState.value = LikeFabState.UNLIKE
+            _fabState.value = LikeFabState.EDIT
+        }
+    }
+
+    @TestOnly
+    fun addRecord() {
+        uiScope.launch {
+            Log.d(
+                "BikeDialogViewModel", "addRecord: " +
+                        "${bikeInfo.id}"
+            )
+//            Repository.insertOrderRecord(
+//                OrderRecord(
+//                    bikeInfo.id!!,
+//                    bikeInfo.ownerId!!,
+//                    User.currentUser.value?.id!!
+//                ).apply {
+//                    id = System.currentTimeMillis()
+//                    isUsed = true
+//                    startTime = System.currentTimeMillis()
+//                    endTime = System.currentTimeMillis() + 12312414L
+//                })
         }
     }
 
@@ -72,11 +74,11 @@ class BikeDialogViewModel(
         _fabState.value = LikeFabState.UNLIKE
     }
 
-    class Factory(val app: Application, val bikeInfo: BikeInfo) :
+    class Factory(val app: Application, val bikeIndex: Int) :
         ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return BikeDialogViewModel(app, bikeInfo) as T
+            return BikeDialogViewModel(app, bikeIndex) as T
         }
     }
 

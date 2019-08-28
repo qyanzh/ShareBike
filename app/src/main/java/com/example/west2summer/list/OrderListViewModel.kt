@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.west2summer.source.BikeInfo
-import com.example.west2summer.source.Repository
+import com.example.west2summer.source.Network
 import com.example.west2summer.source.User
 import com.example.west2summer.source.getDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -14,8 +14,6 @@ import kotlinx.coroutines.Job
 
 class OrderListViewModel(app: Application) : AndroidViewModel(app) {
 
-    //TODO: move to repository
-    private val repository = Repository(getDatabase(app))
     val records = getDatabase(app).orderRecordDao.getAll(User.currentUser.value!!.id)
 
     private var viewModelJob = Job()
@@ -23,7 +21,7 @@ class OrderListViewModel(app: Application) : AndroidViewModel(app) {
     val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     suspend fun getBikeInfo(id: Long): BikeInfo? {
-        return repository.getBikeInfo(id)
+        return Network.service.getBikeAsync(id).await().bike
     }
 
     override fun onCleared() {

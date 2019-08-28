@@ -45,7 +45,7 @@ class OrderListFragment : Fragment() {
                 viewModel.getBikeInfo(it.bikeId)?.let {
                     try {
                         findNavController().navigate(
-                            OrderListFragmentDirections.actionOrderListFragmentToBikeInfoDialog(it)
+                            OrderListFragmentDirections.actionOrderListFragmentToBikeInfoDialog(-1)
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()

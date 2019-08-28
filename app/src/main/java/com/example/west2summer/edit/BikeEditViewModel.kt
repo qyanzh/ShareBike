@@ -5,24 +5,30 @@ import android.widget.Toast
 import androidx.lifecycle.*
 import com.example.west2summer.R
 import com.example.west2summer.component.EditState
-import com.example.west2summer.source.*
-import kotlinx.coroutines.*
+import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.Repository
+import com.example.west2summer.source.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import java.text.SimpleDateFormat
 import java.util.*
 
 class BikeEditViewModel(
-    application: Application,
-    private val bikeInfo: BikeInfo
-) : AndroidViewModel(application) {
-
-    //TODO: move to repository
-    private val repository = Repository(getDatabase(application))
-
-    private lateinit var database: MyDatabase
+    val app: Application,
+    private val bikeInfo: BikeInfo,
+    private val bikeIndex: Int
+) : AndroidViewModel(app) {
 
     private val viewModelJob = Job()
 
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+    val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    val message = MutableLiveData<String?>()
+
+    fun onMessageShowed() {
+        message.value = null
+    }
 
     /* 标题 */
     val uiTitle = MutableLiveData<String?>()
@@ -37,8 +43,8 @@ class BikeEditViewModel(
     val uiNote = MutableLiveData<String?>()
 
     /* 模式 */
-    val mode: EditState = when (bikeInfo.bikeId) {
-        null -> EditState.ADD
+    val mode: EditState = when (bikeIndex) {
+        -1 -> EditState.ADD
         else -> EditState.EDIT
     }
 
@@ -88,28 +94,25 @@ class BikeEditViewModel(
 
     /* 初始化 */
     init {
-        uiScope.launch {
-            withContext(Dispatchers.IO) {
-                database = getDatabase(application)
-            }
-            with(bikeInfo) {
+        with(bikeInfo) {
+            if (ownerId == null) {
                 ownerId = User.currentUser.value?.id
-                title?.let { uiTitle.value = it }
-                battery?.let { uiBattery.value = it.toString() }
-                avaFrom?.let {
-                    preUiFrom.value = Calendar.getInstance().apply { timeInMillis = it }
-                }
-                avaTo?.let {
-                    preUiTo.value = Calendar.getInstance().apply { timeInMillis = it }
-                }
-                price?.let { uiPrice.value = price.toString() }
-                note?.let { uiNote.value = note }
             }
+            title?.let { uiTitle.value = it }
+            battery?.let { uiBattery.value = it }
+            avaFrom?.let {
+                preUiFrom.value = Calendar.getInstance().apply { timeInMillis = it }
+            }
+            avaTo?.let {
+                preUiTo.value = Calendar.getInstance().apply { timeInMillis = it }
+            }
+            price?.let { uiPrice.value = price.toString() }
+            note?.let { uiNote.value = note }
         }
     }
 
     /* 完成 */
-    fun onDoneMenuClicked(): Boolean {
+    suspend fun onDoneMenuClicked(): Boolean {
         if (uiTitle.value.isNullOrEmpty()) {
             Toast.makeText(
                 getApplication(),
@@ -124,7 +127,7 @@ class BikeEditViewModel(
         if (uiBattery.value.isNullOrEmpty()) {
             bikeInfo.battery = null
         } else {
-            bikeInfo.battery = uiBattery.value!!.toDouble()
+            bikeInfo.battery = uiBattery.value
         }
 
         if (uiPrice.value.isNullOrEmpty()) {
@@ -141,30 +144,31 @@ class BikeEditViewModel(
 
         bikeInfo.avaFrom = preUiFrom.value?.timeInMillis
         bikeInfo.avaTo = preUiTo.value?.timeInMillis
-        //TODO: 上传到服务器
-        CoroutineScope(Dispatchers.IO).launch {
-            database.bikeInfoDao.insert(bikeInfo)
-            withContext(Dispatchers.Main) {
-                if (mode == EditState.ADD) {
-                    Toast.makeText(getApplication(), "创建成功", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(getApplication(), "修改成功", Toast.LENGTH_SHORT).show()
-                }
+        var result = false
+        if (mode == EditState.ADD) {
+            if (Repository.insertBike(bikeInfo)) {
+                message.value = app.getString(R.string.create_success)
+                result = true
+            }
+        } else {
+            if (Repository.modifyBike(bikeIndex, bikeInfo)) {
+                message.value = app.getString(R.string.modify_success)
+                result = true
             }
         }
-        return true
+        return result
     }
 
     /* 删除 */
-    fun onDelete(): Boolean {
-        CoroutineScope(Dispatchers.IO).launch {
-            database.bikeInfoDao.delete(bikeInfo)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(getApplication(), "已删除", Toast.LENGTH_SHORT).show()
-            }
+    suspend fun onDelete(): Boolean {
+        var result = false
+        if (Repository.deleteBike(bikeIndex)) {
+            message.value = app.getString(R.string.delete_success)
+            result = true
+        } else {
+            message.value = "未知错误"
         }
-        //TODO: 删除本项
-        return true
+        return result
     }
 
     override fun onCleared() {
@@ -172,11 +176,11 @@ class BikeEditViewModel(
         viewModelJob.cancel()
     }
 
-    class Factory(val app: Application, val bikeInfo: BikeInfo) :
+    class Factory(val app: Application, val bikeInfo: BikeInfo, val bikeIndex: Int) :
         ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return BikeEditViewModel(app, bikeInfo) as T
+            return BikeEditViewModel(app, bikeInfo.copy(), bikeIndex) as T
         }
     }
 

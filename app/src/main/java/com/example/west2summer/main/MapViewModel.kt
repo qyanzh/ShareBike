@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
-import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.Repository
 import com.example.west2summer.source.getDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -21,20 +20,17 @@ class MapViewModel(
 
     private val repository = Repository(getDatabase(application))
 
-    val infoList = repository.bikeInfos
+    val infoList = Repository.bikeList
 
     var markerMapping = Transformations.map(infoList) {
-        val map = HashMap<MarkerOptions, BikeInfo>()
+        val map = HashMap<MarkerOptions, Int>()
         infoList.value?.let {
-            for (info in infoList.value!!) {
-                val latLng = LatLng(info.lat, info.lng)
-                val markerOptions = MarkerOptions().position(latLng)
-                map[markerOptions] = info
-
-                Log.d(
-                    "MapViewModel", "refreshMarkersAndBikeInfos: " +
-                            "added marker$markerOptions"
-                )
+            for ((index, info) in infoList.value!!.withIndex()) {
+                info?.let {
+                    val latLng = LatLng(info.lat, info.lng)
+                    val markerOptions = MarkerOptions().position(latLng)
+                    map[markerOptions] = index
+                }
             }
         }
         map

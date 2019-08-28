@@ -3,7 +3,6 @@ package com.example.west2summer.main
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
@@ -13,13 +12,11 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.Glide
 import com.example.west2summer.R
-import com.example.west2summer.component.MyNavigationUI
-import com.example.west2summer.component.REQUEST_NAV_HEADER
-import com.example.west2summer.component.handleImage
-import com.example.west2summer.component.toastUiScope
+import com.example.west2summer.component.*
 import com.example.west2summer.databinding.ActivityMainBinding
 import com.example.west2summer.databinding.ActivityMainNavHeaderBinding
 import com.example.west2summer.source.Network
+import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
 import kotlinx.coroutines.*
 import java.net.ConnectException
@@ -48,8 +45,7 @@ class MainActivity : AppCompatActivity() {
         navBinding.viewModel = navViewModel
         navBinding.logoutButton.setOnClickListener {
             User.logout()
-            Toast.makeText(applicationContext, getString(R.string.exit_success), Toast.LENGTH_SHORT)
-                .show()
+            toast(applicationContext, getString(R.string.exit_success))
         }
         navBinding.loginInfo.setOnClickListener {
             if (!User.isLoginned()) {
@@ -73,7 +69,10 @@ class MainActivity : AppCompatActivity() {
         navBinding.invalidateAll()
         setupNavigation()
         uiScope.launch {
-            savedInstanceState ?: autoLogin()
+            if (savedInstanceState == null) {
+                autoLogin()
+                Repository.refreshBikeList()
+            }
         }
     }
 
@@ -145,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean("shouldAutoLogin", false)
+        outState.putBoolean("firstIn", false)
     }
 
 }

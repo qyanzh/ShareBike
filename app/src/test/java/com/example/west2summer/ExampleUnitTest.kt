@@ -6,6 +6,8 @@ import com.example.west2summer.source.NetworkUser
 import com.squareup.moshi.Moshi
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -82,6 +84,19 @@ class ExampleUnitTest {
         val data2 = User(123L)
         val copy2 = data.copy(456L)
         print(data2.hashCode() == copy2.hashCode())
+    }
+
+    @Test
+    fun time() {
+        val formatter = SimpleDateFormat("yy/MM/dd hh:mm", Locale.getDefault())
+
+        val calendar = Calendar.getInstance()
+        println("Calendar : ${calendar.timeInMillis}") // Java : calendar.getTimeInMillis()
+        println("${formatter.format(calendar.timeInMillis)}")
+
+        val date = Date()
+        println("date : ${date.time}")
+        println("${formatter.format(date)}")
     }
 
 }

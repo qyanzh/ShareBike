@@ -170,7 +170,7 @@
                         android:drawablePadding="16dp"
                         android:gravity="center_vertical"
                         android:minHeight="@dimen/bottom_sheet_item_height"
-                        android:text="@{viewModel.bikeInfo.batteryString()}"
+                        android:text="@{viewModel.bikeInfo.battery}"
                         android:textSize="16sp"
                         android:visibility="@{viewModel.bikeInfo.battery==null ? View.GONE : View.VISIBLE}"
                         tools:text="50km" />
@@ -222,7 +222,7 @@
                 android:layout_marginBottom="16dp"
                 android:src="@drawable/ic_favorite_border_black_24dp"
                 android:text="@string/want_rent"
-                android:visibility="@{viewModel.bikeInfo.leaseStatus==false?View.VISIBLE:View.GONE}"
+                android:visibility="@{viewModel.bikeInfo.leaseStatus==0?View.VISIBLE:View.GONE}"
                 app:layout_anchor="@+id/image"
                 app:layout_anchorGravity="end|bottom" />
 

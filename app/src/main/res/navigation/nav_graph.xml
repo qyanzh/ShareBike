@@ -18,12 +18,12 @@
         android:name="com.example.west2summer.dialog.BikeDialogFragment"
         android:label="BikeInfoDialogFragment"
         tools:layout="@layout/bike_dialog_fragment">
-        <argument
-            android:name="bikeinfo"
-            app:argType="com.example.west2summer.source.BikeInfo" />
         <action
             android:id="@+id/action_bike_info_dialog_to_editBikeInfoFragment"
             app:destination="@id/editBikeInfoFragment" />
+        <argument
+            android:name="bikeIndex"
+            app:argType="integer" />
     </dialog>
     <fragment
         android:id="@+id/loginFragment"
@@ -84,6 +84,9 @@
         <argument
             android:name="bikeinfo"
             app:argType="com.example.west2summer.source.BikeInfo" />
+        <argument
+            android:name="bikeIndex"
+            app:argType="integer" />
     </fragment>
 
 </navigation>

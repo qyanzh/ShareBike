@@ -22,8 +22,10 @@ import com.amap.api.maps.TextureMapView
 import com.amap.api.maps.model.*
 import com.example.west2summer.R
 import com.example.west2summer.component.convertLatLngToPlace
+import com.example.west2summer.component.toastUiScope
 import com.example.west2summer.databinding.MapFragmentBinding
 import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -158,20 +160,25 @@ class MapFragment : Fragment() {
     private fun setupCenterMarkerInfoWindow() {
         CoroutineScope(Dispatchers.Main).launch {
             withContext(Dispatchers.IO) {
-                centerMarker?.title = convertLatLngToPlace(
-                    context!!,
-                    centerMarker!!.position.latitude,
-                    centerMarker!!.position.longitude
-                ).pois[0].toString()
+                try {
+                    centerMarker?.title = convertLatLngToPlace(
+                        context!!,
+                        centerMarker!!.position.latitude,
+                        centerMarker!!.position.longitude
+                    ).pois[0].toString()
+                    centerMarker?.showInfoWindow()
+                } catch (e: Exception) {
+                    toastUiScope(context!!, getString(R.string.exam_network))
+                }
             }
-            centerMarker?.showInfoWindow()
         }
     }
 
     private fun refreshMarkers() {
         map.clear(true)
         viewModel.markerMapping.value?.keys?.forEach { options ->
-            val bike = viewModel.markerMapping.value!![options]
+            val index = viewModel.markerMapping.value!![options]!!
+            val bike = Repository.bikeList.value!![index]
             if (User.currentUser.value?.id == bike?.ownerId) {
                 options.icon(iconRedMarker)
             } else {
@@ -189,7 +196,7 @@ class MapFragment : Fragment() {
             )
             findNavController().navigate(
                 MapFragmentDirections.actionMapFragmentToEditBikeInfoFragment(
-                    bikeInfo
+                    bikeInfo, -1
                 )
             )
         }
