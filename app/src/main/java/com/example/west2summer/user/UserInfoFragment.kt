@@ -54,11 +54,9 @@ class UserInfoFragment : EditBaseFragment() {
             }
         })
         viewModel.modifySuccess.observe(this, Observer { success ->
-            success?.let {
-                if (success) {
-                    findNavController().navigateUp()
-                    viewModel.onModifySuccess()
-                }
+            if (success == true) {
+                findNavController().navigateUp()
+                viewModel.onModifySuccess()
             }
         })
     }

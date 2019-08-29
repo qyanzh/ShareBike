@@ -18,7 +18,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.example.west2summer.R
-import com.example.west2summer.component.LikeFabState
+import com.example.west2summer.component.LikeState
+import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.BikeDialogFragmentBinding
 import com.example.west2summer.source.User
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,7 +40,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
             this,
             BikeDialogViewModel.Factory(
                 activity.application,
-                BikeDialogFragmentArgs.fromBundle(arguments!!).bikeIndex
+                BikeDialogFragmentArgs.fromBundle(arguments!!).bikeInfo
             )
         ).get(BikeDialogViewModel::class.java)
     }
@@ -67,9 +68,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
                         }
                     }
 
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    }
-
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {}
                 })
                 peekHeight = height
             }
@@ -96,12 +95,18 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun subscribeUi() {
+        viewModel.message.observe(this, Observer {
+            it?.let {
+                toast(context!!, it)
+                viewModel.onMessageShowed()
+            }
+        })
         viewModel.fabState.observe(this, Observer { state ->
             binding.fab.setImageResource(
                 when (state) {
-                    LikeFabState.NULL -> R.drawable.ic_favorite_border_black_24dp
-                    LikeFabState.UNLIKE -> R.drawable.ic_favorite_border_black_24dp
-                    LikeFabState.LIKED -> R.drawable.ic_favorite_black_24dp
+                    LikeState.NULL -> R.drawable.ic_favorite_border_black_24dp
+                    LikeState.UNLIKE -> R.drawable.ic_favorite_border_black_24dp
+                    LikeState.LIKED -> R.drawable.ic_favorite_black_24dp
                     else -> R.drawable.ic_mode_edit_black_24dp
                 }
             )
@@ -109,19 +114,18 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
         binding.fab.setOnClickListener {
             if (User.isLoginned()) {
                 when (viewModel.fabState.value) {
-                    LikeFabState.NULL -> {
-                    }
-                    LikeFabState.UNLIKE -> showLikeDialog()
-                    LikeFabState.LIKED -> undoLike()
-                    else -> findNavController().navigate(
+                    LikeState.UNLIKE -> showLikeDialog()
+                    LikeState.LIKED -> viewModel.sendUndoLikeRequest()
+                    LikeState.EDIT -> findNavController().navigate(
                         BikeDialogFragmentDirections.actionBikeInfoDialogToEditBikeInfoFragment(
-                            viewModel.bikeInfo,
-                            viewModel.bikeIndex
+                            viewModel.bikeInfo
                         )
                     )
+                    else -> {
+                    }
                 }
             } else {
-                Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                toast(context!!, getString(R.string.please_login))
                 findNavController().navigate(BikeDialogFragmentDirections.actionGlobalLoginFragment())
             }
         }
@@ -136,21 +140,15 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun undoLike() {
-        //TODO:向服务器发送取消想租申请
-        viewModel.sendUndoLikeRequest()
-        Toast.makeText(context, "已取消", Toast.LENGTH_SHORT).show()
-    }
-
     private fun showLikeDialog() {
         MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
-            .setTitle("想租这辆车吗？")
-            .setMessage("你和车主将可以看到对方的联系方式")
-            .setPositiveButton("想租") { dialog, _ ->
+            .setTitle(getString(R.string.do_you_want_this_car))
+            .setMessage(getString(R.string.each_can_see_contact))
+            .setPositiveButton(getString(R.string.want_rent)) { dialog, _ ->
                 dialog.dismiss()
                 viewModel.sendLikeRequest()
             }
-            .setNegativeButton("取消") { dialog, _ ->
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                 dialog.dismiss()
             }.show()
     }
@@ -158,7 +156,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
     private fun copyWechat() {
         (context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             .setPrimaryClip(ClipData.newPlainText("wechat", viewModel.owner.value?.wechat))
-        Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, getString(R.string.copied), Toast.LENGTH_SHORT).show()
     }
 
     private fun jumpToQQ() {
@@ -166,7 +164,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
             val url = "mqqwpa://im/chat?chat_type=wpa&uin=${viewModel.owner.value?.qq}"
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
-            Toast.makeText(context, "未安装QQ", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.qq_not_installed), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -179,7 +177,8 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
         } catch (e: Exception) {
             (context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                 .setPrimaryClip(ClipData.newPlainText("phone", viewModel.owner.value?.phone))
-            Toast.makeText(context, "未找到电话应用, 已复制到剪切板", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.phone_not_installed), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -204,6 +203,5 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
                 }
             }.show()
     }
-
 
 }

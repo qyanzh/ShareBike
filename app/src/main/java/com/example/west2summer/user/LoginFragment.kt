@@ -49,7 +49,7 @@ class LoginFragment : Fragment() {
             }
         })
         viewModel.loginSuccess.observe(this, Observer { loginSuccess ->
-            if (loginSuccess) {
+            if (loginSuccess == true) {
                 findNavController().navigateUp()
                 viewModel.onLoginSuccess()
             }

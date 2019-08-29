@@ -10,11 +10,11 @@ import kotlinx.android.parcel.Parcelize
 @Entity(tableName = "bike_info")
 @Parcelize
 data class BikeInfo(
-    @field:Json(name = "latitude") val lat: Double,//经度，非空
-    @field:Json(name = "longitude") val lng: Double,//纬度，非空
-    @field:Json(name = "owner_id") var ownerId: Long? = null,//车主ID，非空
+    @field:Json(name = "latitude") var lat: Double,//经度，非空
+    @field:Json(name = "longitude") var lng: Double,//纬度，非空
+    @field:Json(name = "owner_id") var ownerId: Long,//车主ID，非空
     @PrimaryKey
-    @field:Json(name = "id") var id: Long? = null,//条目ID，非空
+    @field:Json(name = "id") var id: Long = -1,//条目ID，非空
     @field:Json(name = "name") var title: String? = null,//标题
     @field:Json(name = "battery") var battery: String? = null,//电池剩余
     @field:Json(name = "available_time") var avaFrom: Long? = null,//可用时间
@@ -47,8 +47,8 @@ data class BikeInfo(
 
 @Dao
 interface BikeInfoDao {
-    @Query("select * from bike_info")
-    fun getAll(): LiveData<List<BikeInfo>>
+    @Query("select * from bike_info where leaseStatus = 0")
+    fun getActiveBikes(): LiveData<List<BikeInfo>>
 
     @Query("select * from bike_info where id= :id")
     fun get(id: Long): BikeInfo?

@@ -53,7 +53,7 @@ class RegisterFragment : EditBaseFragment() {
             }
         })
         viewModel.registerSuccess.observe(this, Observer { loginSuccess ->
-            if (loginSuccess) {
+            if (loginSuccess == true) {
                 findNavController().navigateUp()
                 viewModel.onRegistered()
             }

@@ -21,7 +21,7 @@ interface Service {
     /* 登录 */
     @FormUrlEncoded
     @POST("api/ev_user/login")
-    fun loginAsync(@Field("id") id: Long, @Field("password") password: String): Deferred<BasicResponse>
+    fun loginAsync(@Field("id") id: Long, @Field("password") password: String): Deferred<NetworkResponse>
 
     /* 个人信息*/
     @GET("api/query/ev_user/id/{id}")
@@ -48,18 +48,38 @@ interface Service {
     /* 删除车辆 */
     @FormUrlEncoded
     @POST("api/ev_bike/delete")
-    fun deleteBikeAsync(@Field("id") id: Long): Deferred<BasicResponse>
+    fun deleteBikeAsync(@Field("id") id: Long): Deferred<NetworkResponse>
 
     /* 全部车辆*/
     @GET("api/query/ev_bike/all")
     fun getAllBikesAsync(): Deferred<NetworkBikeList>
 
+    /* ------流动信息------*/
+
+    /* 根据车主获取流动记录*/
+    @GET("api/query/ev_record/owner_id/{owner_id}")
+    fun getRecordByOwnerIdAsync(@Path("owner_id") ownerId: Long): Deferred<NetworkRecordList>
+
+    /* 根据使用者获取流动记录*/
+    @GET("api/query/ev_record/user_id/{user_id}")
+    fun getRecordByUserIdAsync(@Path("user_id") userId: Long): Deferred<NetworkRecordList>
+
+    /* 根据车辆获取流动记录*/
+    @GET("api/query/ev_record/bike_id/{bike_id}")
+    fun getRecordByBikeIdAsync(@Path("bike_id") bikeId: Long): Deferred<NetworkRecordList>
+
+    @POST("api/ev_record/insert")
+    fun sendLikeRequestAsync(@Body record: OrderRecord): Deferred<NetworkResponse>
+
+    @FormUrlEncoded
+    @POST("api/ev_record/delete")
+    fun deleteRecordAsync(@Field("id") id: Long): Deferred<NetworkResponse>
 
     /* ------开发------*/
 
     @FormUrlEncoded
     @POST("api/ev_user/delete")
-    fun deleteUserAsync(@Field("id") id: Long): Deferred<BasicResponse>
+    fun deleteUserAsync(@Field("id") id: Long): Deferred<NetworkResponse>
 
 }
 
@@ -83,7 +103,7 @@ object Network {
     val service = retrofit.create(Service::class.java)
 }
 
-data class BasicResponse(
+data class NetworkResponse(
     val status: Int?,
     val msg: String?,//Success
     val data: String?,
@@ -102,7 +122,7 @@ data class NetworkBikeList(
     val status: Int?,
     val msg: String?,//OK
     @field:Json(name = "data")
-    val bikes: List<BikeInfo?>,
+    val bikes: List<BikeInfo>,
     val ok: String?
 )
 
@@ -114,6 +134,14 @@ data class NetworkUser(
     val ok: String?
 )
 
+data class NetworkRecordList(
+    val status: Int?,
+    val msg: String?,//OK
+    @field:Json(name = "data")
+    val records: List<OrderRecord>,
+    val ok: String?
+)
+
 data class NetworkBikeId(
     val status: Int?,
     val msg: String?,//OK
@@ -122,3 +150,5 @@ data class NetworkBikeId(
     val ok: String?
 )
 
+class IdentifyErrorException : Exception()
+class RegisteredException : Exception()

@@ -21,11 +21,10 @@ import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.TextureMapView
 import com.amap.api.maps.model.*
 import com.example.west2summer.R
-import com.example.west2summer.component.convertLatLngToPlace
-import com.example.west2summer.component.toastUiScope
+import com.example.west2summer.component.convertLatLngToPlaceAsync
+import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.MapFragmentBinding
 import com.example.west2summer.source.BikeInfo
-import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -93,7 +92,6 @@ class MapFragment : Fragment() {
 
         User.currentUser.observe(this, Observer {
             refreshMarkers()
-
         })
 
         viewModel.markerMapping.observe(this, Observer {
@@ -159,32 +157,30 @@ class MapFragment : Fragment() {
 
     private fun setupCenterMarkerInfoWindow() {
         CoroutineScope(Dispatchers.Main).launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    centerMarker?.title = convertLatLngToPlace(
+            try {
+                withContext(Dispatchers.IO) {
+                    centerMarker?.title = convertLatLngToPlaceAsync(
                         context!!,
                         centerMarker!!.position.latitude,
                         centerMarker!!.position.longitude
                     ).pois[0].toString()
-                    centerMarker?.showInfoWindow()
-                } catch (e: Exception) {
-                    toastUiScope(context!!, getString(R.string.exam_network))
                 }
+                centerMarker?.showInfoWindow()
+            } catch (e: Exception) {
+                toast(context!!, getString(R.string.exam_network))
             }
         }
     }
 
     private fun refreshMarkers() {
         map.clear(true)
-        viewModel.markerMapping.value?.keys?.forEach { options ->
-            val index = viewModel.markerMapping.value!![options]!!
-            val bike = Repository.bikeList.value!![index]
-            if (User.currentUser.value?.id == bike?.ownerId) {
-                options.icon(iconRedMarker)
+        viewModel.markerMapping.value?.entries?.forEach {
+            if (User.currentUser.value?.id == it.value.ownerId) {
+                it.key.icon(iconRedMarker)
             } else {
-                options.icon(iconBlueMarker)
+                it.key.icon(iconBlueMarker)
             }
-            map.addMarker(options)
+            map.addMarker(it.key)
         }
     }
 
@@ -192,11 +188,12 @@ class MapFragment : Fragment() {
         centerMarker?.let {
             val bikeInfo = BikeInfo(
                 it.position.latitude,
-                it.position.longitude
+                it.position.longitude,
+                User.currentUser.value!!.id
             )
             findNavController().navigate(
                 MapFragmentDirections.actionMapFragmentToEditBikeInfoFragment(
-                    bikeInfo, -1
+                    bikeInfo
                 )
             )
         }
@@ -289,7 +286,7 @@ class MapFragment : Fragment() {
                     })
         )
     }
-    val iconRedMarker by lazy {
+    private val iconRedMarker by lazy {
         BitmapDescriptorFactory.fromBitmap(
             BitmapFactory
                 .decodeResource(
@@ -301,7 +298,7 @@ class MapFragment : Fragment() {
         )
     }
 
-    val iconBlueMarker by lazy {
+    private val iconBlueMarker by lazy {
         BitmapDescriptorFactory.fromBitmap(
             BitmapFactory
                 .decodeResource(

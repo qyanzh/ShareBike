@@ -47,7 +47,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:visibility="@{viewModel.fabState == LikeFabState.UNLIKE ? View.GONE : View.VISIBLE}">
+                        android:visibility="@{viewModel.fabState == LikeState.UNLIKE ? View.GONE : View.VISIBLE}">
 
                         <!--名字-->
                         <TextView
@@ -234,7 +234,7 @@
 
         <import type="android.view.View" />
 
-        <import type="com.example.west2summer.component.LikeFabState" />
+        <import type="com.example.west2summer.component.LikeState" />
 
         <variable
             name="viewModel"

@@ -1,84 +1,119 @@
 package com.example.west2summer.dialog
 
 import android.app.Application
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.west2summer.component.LikeFabState
+import androidx.lifecycle.*
+import com.example.west2summer.R
+import com.example.west2summer.component.LikeState
 import com.example.west2summer.source.BikeInfo
+import com.example.west2summer.source.OrderRecord
 import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.TestOnly
+import java.net.ConnectException
 
 class BikeDialogViewModel(
-    val application: Application,
-    val bikeIndex: Int
-) : ViewModel() {
-    val bikeInfo: BikeInfo = Repository.bikeList.value!![bikeIndex]!!
+    val app: Application,
+    val bikeInfo: BikeInfo
+) : AndroidViewModel(app) {
 
     private val viewModelJob = Job()
 
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-    val owner = User.currentUser
+    val owner = MutableLiveData<User>()
+    private lateinit var records: List<OrderRecord>
+    var likeRecordId: Long = -1
 
-    private val _fabState = MutableLiveData<LikeFabState?>()
+    val message = MutableLiveData<String?>()
 
-    val fabState: LiveData<LikeFabState?>
+    fun onMessageShowed() {
+        message.value = null
+    }
+
+    private val _fabState = MutableLiveData<LikeState?>()
+
+    val fabState: LiveData<LikeState?>
         get() = _fabState
 
     init {
-        if (User.isLoginned() && User.currentUser.value!!.id == bikeInfo.ownerId) {
-            _fabState.value = LikeFabState.EDIT
-        } else {
-            //TODO: 询问服务器该用户是否想要这辆车
-            _fabState.value = LikeFabState.LIKED
-            _fabState.value = LikeFabState.UNLIKE
-            _fabState.value = LikeFabState.EDIT
+        _fabState.value = LikeState.NULL
+        if (User.isLoginned()) {
+            if (User.currentUser.value!!.id == bikeInfo.ownerId) {
+                owner.value = User.currentUser.value!!
+                _fabState.value = LikeState.EDIT
+            } else {
+                uiScope.launch {
+                    checkLike()
+                }
+            }
         }
     }
 
-    @TestOnly
-    fun addRecord() {
-        uiScope.launch {
-            Log.d(
-                "BikeDialogViewModel", "addRecord: " +
-                        "${bikeInfo.id}"
-            )
-//            Repository.insertOrderRecord(
-//                OrderRecord(
-//                    bikeInfo.id!!,
-//                    bikeInfo.ownerId!!,
-//                    User.currentUser.value?.id!!
-//                ).apply {
-//                    id = System.currentTimeMillis()
-//                    isUsed = true
-//                    startTime = System.currentTimeMillis()
-//                    endTime = System.currentTimeMillis() + 12312414L
-//                })
+    private suspend fun checkLike() {
+        try {
+            records = Repository.getOrderRecords(bikeInfo.id)
+            _fabState.value = LikeState.UNLIKE
+            for (orderRecord in records) {
+                if (orderRecord.userId == User.currentUser.value?.id) {
+                    _fabState.value = LikeState.LIKED
+                    likeRecordId = orderRecord.id
+                    break
+                }
+            }
+        } catch (e: Exception) {
+            message.value = when (e) {
+                is ConnectException -> app.getString(R.string.exam_network)
+                else -> e.toString()
+            }
         }
     }
+
 
     fun sendLikeRequest() {
-        //TODO:向服务器发送想租请求，返回车主联系方式,初始化ownner
-        _fabState.value = LikeFabState.LIKED
-        addRecord()
+        uiScope.launch {
+            if (User.isLoginned()) {
+                try {
+                    Repository.sendLikeRequest(
+                        bikeInfo.id,
+                        bikeInfo.ownerId,
+                        User.currentUser.value!!.id
+                    )
+                    //TODO：返回ID初始化id
+                    owner.value = Repository.getUserInfo(bikeInfo.ownerId)
+                    message.value = app.getString(R.string.liked)
+                    _fabState.value = LikeState.LIKED
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     fun sendUndoLikeRequest() {
-        _fabState.value = LikeFabState.UNLIKE
+        uiScope.launch {
+            if (User.isLoginned()) {
+                try {
+                    Repository.sendUnlikeRequest(likeRecordId)
+                    owner.value = null
+                    message.value = app.getString(R.string.canceled)
+                    _fabState.value = LikeState.UNLIKE
+                } catch (e: Exception) {
+                    message.value = when (e) {
+                        is ConnectException -> app.getString(R.string.exam_network)
+                        else -> e.toString()
+                    }
+                }
+            }
+        }
     }
 
-    class Factory(val app: Application, val bikeIndex: Int) :
+    class Factory(val app: Application, val bikeInfo: BikeInfo) :
         ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return BikeDialogViewModel(app, bikeIndex) as T
+            return BikeDialogViewModel(app, bikeInfo) as T
         }
     }
 

@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.example.west2summer.R
+import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.OrderListFragmentBinding
 import kotlinx.coroutines.launch
 
@@ -40,32 +39,38 @@ class OrderListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = OrderListFragmentBinding.inflate(inflater)
-        val adapter = OrderAdapter(OrderRecordListener {
+        val adapter = OrderAdapter(context!!, OrderRecordListener {
             viewModel.uiScope.launch {
                 viewModel.getBikeInfo(it.bikeId)?.let {
                     try {
                         findNavController().navigate(
-                            OrderListFragmentDirections.actionOrderListFragmentToBikeInfoDialog(-1)
+                            OrderListFragmentDirections.actionGlobalBikeInfoDialog(it)
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                } ?: Toast.makeText(
-                    context,
-                    getString(R.string.network_error),
-                    Toast.LENGTH_SHORT
-                ).show()
+                }
             }
         })
+        subscribeUi()
         binding.recyclerView.adapter = adapter
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
         viewModel.records.observe(this, Observer {
             it?.let {
                 adapter.submitList(it)
             }
         })
-        binding.lifecycleOwner = this
-        binding.viewModel = viewModel
         return binding.root
+    }
+
+    private fun subscribeUi() {
+        viewModel.message.observe(this, Observer {
+            it?.let {
+                toast(context!!, it)
+                viewModel.onMessageShowed()
+            }
+        })
     }
 
 }

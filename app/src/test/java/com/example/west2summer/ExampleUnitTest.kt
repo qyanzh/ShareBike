@@ -1,7 +1,6 @@
 package com.example.west2summer
 
 import com.example.west2summer.component.toMD5
-import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.NetworkUser
 import com.squareup.moshi.Moshi
 import org.junit.Assert.assertEquals
@@ -27,26 +26,26 @@ class ExampleUnitTest {
     }
 
 
-    @Test
-    fun jsonToMapTest() {
-
-        val moshi = Moshi.Builder().build()
-
-        val bikeAdapter = moshi.adapter(BikeInfo::class.java)
-
-
-        val bikeInfo = BikeInfo(123.0, 123.0)
-
-        bikeInfo.note=""
-        bikeInfo.note = null
-
-        val json = bikeAdapter.toJson(bikeInfo)
-
-        println(json)
-
-        println(bikeAdapter.fromJson(json))
-
-    }
+//    @Test
+//    fun jsonToMapTest() {
+//
+//        val moshi = Moshi.Builder().build()
+//
+//        val bikeAdapter = moshi.adapter(BikeInfo::class.java)
+//
+//
+//        val bikeInfo = BikeInfo(123.0, 123.0)
+//
+//        bikeInfo.note=""
+//        bikeInfo.note = null
+//
+//        val json = bikeAdapter.toJson(bikeInfo)
+//
+//        println(json)
+//
+//        println(bikeAdapter.fromJson(json))
+//
+//    }
 
     @Test
     fun userJson() {
@@ -92,11 +91,24 @@ class ExampleUnitTest {
 
         val calendar = Calendar.getInstance()
         println("Calendar : ${calendar.timeInMillis}") // Java : calendar.getTimeInMillis()
-        println("${formatter.format(calendar.timeInMillis)}")
+        println(formatter.format(calendar.timeInMillis))
 
         val date = Date()
         println("date : ${date.time}")
-        println("${formatter.format(date)}")
+        println(formatter.format(date))
+    }
+
+    fun throwfun() {
+        try {
+            throw Exception("try")
+        } catch (e: Exception) {
+            throw Exception("catch")
+        }
+    }
+
+    @Test
+    fun test() {
+        print(throwfun())
     }
 
 }

@@ -13,7 +13,6 @@ import com.example.west2summer.component.*
 import com.example.west2summer.databinding.BikeEditFragmentBinding
 import com.example.west2summer.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.launch
 import java.util.*
 
 class BikeEditFragment : EditBaseFragment() {
@@ -28,11 +27,9 @@ class BikeEditFragment : EditBaseFragment() {
             this,
             BikeEditViewModel.Factory(
                 activity.application,
-                BikeEditFragmentArgs.fromBundle(arguments!!).bikeinfo,
-                BikeEditFragmentArgs.fromBundle(arguments!!).bikeIndex
+                BikeEditFragmentArgs.fromBundle(arguments!!).bikeinfo
             )
-        )
-            .get(BikeEditViewModel::class.java)
+        ).get(BikeEditViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -57,33 +54,43 @@ class BikeEditFragment : EditBaseFragment() {
     }
 
     private fun subscribeUi() {
-        viewModel.message.observe(this, Observer {
-            it?.let {
-                toast(context!!, it)
+        viewModel.editSuccess.observe(this, Observer { success ->
+            success?.let {
+                if (success) {
+                    findNavController().navigateUp()
+                    viewModel.onSuccess()
+                }
+            }
+        })
+        viewModel.message.observe(this, Observer { msg ->
+            msg?.let {
+                toast(context!!, msg)
                 viewModel.onMessageShowed()
             }
         })
         viewModel.shouldOpenPicker.observe(this, Observer {
             hideKeyboard()
-            if (it > 0) {
-                val pvBuilder = TimePickerBuilder(context) { date: Date, _: View? ->
-                    val c = Calendar.getInstance()
-                    c.time = date
-                    viewModel.onTimePicked(c)
-                }.addOnCancelClickListener {
-                    viewModel.onTimePicked(null)
-                }.setType(booleanArrayOf(true, true, true, true, true, false))
-                    .setSubmitColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
-                    .setCancelColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
-                    .setCancelText(getString(R.string.clear))
-                when (it) {
-                    1 -> viewModel.preUiFrom.value?.let { c -> pvBuilder.setDate(c) }
-                    2 -> viewModel.preUiTo.value?.let { c -> pvBuilder.setDate(c) }
+            it?.let {
+                if (it > 0) {
+                    val pvBuilder = TimePickerBuilder(context) { date: Date, _: View? ->
+                        val c = Calendar.getInstance()
+                        c.time = date
+                        viewModel.onTimePicked(c)
+                    }.addOnCancelClickListener {
+                        viewModel.onTimePicked(null)
+                    }.setType(booleanArrayOf(true, true, true, true, true, false))
+                        .setSubmitColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
+                        .setCancelColor(ContextCompat.getColor(context!!, R.color.primaryTextColor))
+                        .setCancelText(getString(R.string.clear))
+                    when (it) {
+                        1 -> viewModel.preUiFrom.value?.let { c -> pvBuilder.setDate(c) }
+                        2 -> viewModel.preUiTo.value?.let { c -> pvBuilder.setDate(c) }
+                    }
+                    pvBuilder.build().setOnDismissListener {
+                        binding.rootLinear.requestFocus()
+                        viewModel.onTimePicked(null)
+                    }.show()
                 }
-                pvBuilder.build().setOnDismissListener {
-                    binding.rootLinear.requestFocus()
-                    viewModel.onTimePicked(null)
-                }.show()
             }
         })
     }
@@ -98,11 +105,17 @@ class BikeEditFragment : EditBaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit_done -> {
-                viewModel.uiScope.launch {
-                    if (viewModel.onDoneMenuClicked()) {
-                        findNavController().navigateUp()
+                viewModel.onDoneClicked()
+            }
+            R.id.edit_delete -> {
+                MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
+                    .setMessage(getString(R.string.confirm_delete))
+                    .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                        viewModel.onDeleteClicked()
                     }
-                }
+                    .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                        dialog.dismiss()
+                    }.show()
             }
             R.id.edit_image -> {
                 if (viewModel.bikeImage.value == null) {
@@ -118,20 +131,6 @@ class BikeEditFragment : EditBaseFragment() {
                         }
                     }.show()
                 }
-            }
-            R.id.edit_delete -> {
-                MaterialAlertDialogBuilder(context, R.style.AlertDialogTheme)
-                    .setMessage("确认删除吗？本操作无法撤回")
-                    .setPositiveButton("删除") { _, _ ->
-                        viewModel.uiScope.launch {
-                            if (viewModel.onDelete()) {
-                                findNavController().navigateUp()
-                            }
-                        }
-                    }
-                    .setNegativeButton("取消") { dialog, _ ->
-                        dialog.dismiss()
-                    }.show()
             }
             android.R.id.home -> requireActivity().onBackPressed()
         }

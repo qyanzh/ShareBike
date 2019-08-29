@@ -1,28 +1,34 @@
 package com.example.west2summer.edit
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.*
 import com.example.west2summer.R
 import com.example.west2summer.component.EditState
+import com.example.west2summer.component.shortTimeFormatter
 import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.launch
+import java.net.ConnectException
 import java.util.*
 
 class BikeEditViewModel(
     val app: Application,
-    private val bikeInfo: BikeInfo,
-    private val bikeIndex: Int
+    private val bikeInfo: BikeInfo
 ) : AndroidViewModel(app) {
 
     private val viewModelJob = Job()
 
     val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    val editSuccess = MutableLiveData<Boolean?>()
+
+    fun onSuccess() {
+        editSuccess.value = null
+    }
 
     val message = MutableLiveData<String?>()
 
@@ -43,8 +49,8 @@ class BikeEditViewModel(
     val uiNote = MutableLiveData<String?>()
 
     /* 模式 */
-    val mode: EditState = when (bikeIndex) {
-        -1 -> EditState.ADD
+    val mode: EditState = when (bikeInfo.id) {
+        -1L -> EditState.ADD
         else -> EditState.EDIT
     }
 
@@ -60,7 +66,7 @@ class BikeEditViewModel(
     }
 
     /* 时间 */
-    private val timeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
+    private val timeFormatter = shortTimeFormatter
 
     val preUiFrom = MutableLiveData<Calendar?>()
     val uiFrom = Transformations.map(preUiFrom) {
@@ -76,8 +82,8 @@ class BikeEditViewModel(
         } ?: ""
     }
 
-    private val _shouldOpenPicker = MutableLiveData<Int>()
-    val shouldOpenPicker: LiveData<Int>
+    private val _shouldOpenPicker = MutableLiveData<Int?>()
+    val shouldOpenPicker: LiveData<Int?>
         get() = _shouldOpenPicker
 
     fun onTimeClicked(mode: Int) {
@@ -89,14 +95,14 @@ class BikeEditViewModel(
             1 -> preUiFrom.value = c
             2 -> preUiTo.value = c
         }
-        _shouldOpenPicker.value = 0
+        _shouldOpenPicker.value = null
     }
 
     /* 初始化 */
     init {
         with(bikeInfo) {
-            if (ownerId == null) {
-                ownerId = User.currentUser.value?.id
+            if (ownerId == -1L) {
+                User.currentUser.value?.id?.let { ownerId = it }
             }
             title?.let { uiTitle.value = it }
             battery?.let { uiBattery.value = it }
@@ -112,14 +118,10 @@ class BikeEditViewModel(
     }
 
     /* 完成 */
-    suspend fun onDoneMenuClicked(): Boolean {
+    fun onDoneClicked() {
         if (uiTitle.value.isNullOrEmpty()) {
-            Toast.makeText(
-                getApplication(),
-                R.string.please_enter_title,
-                Toast.LENGTH_SHORT
-            ).show()
-            return false
+            message.value = app.getString(R.string.please_enter_title)
+            return
         } else {
             bikeInfo.title = uiTitle.value
         }
@@ -144,31 +146,49 @@ class BikeEditViewModel(
 
         bikeInfo.avaFrom = preUiFrom.value?.timeInMillis
         bikeInfo.avaTo = preUiTo.value?.timeInMillis
-        var result = false
-        if (mode == EditState.ADD) {
-            if (Repository.insertBike(bikeInfo)) {
+
+        uiScope.launch {
+            submit()
+        }
+    }
+
+    /*提交*/
+    private suspend fun submit() {
+        try {
+            if (mode == EditState.ADD) {
+                Repository.insertBikeInfo(bikeInfo)
                 message.value = app.getString(R.string.create_success)
-                result = true
-            }
-        } else {
-            if (Repository.modifyBike(bikeIndex, bikeInfo)) {
+            } else {
+                Repository.updateBikeInfo(bikeInfo)
                 message.value = app.getString(R.string.modify_success)
-                result = true
+            }
+            editSuccess.value = true
+        } catch (e: Exception) {
+            message.value = when (e) {
+                is ConnectException -> app.getString(R.string.exam_network)
+                else -> e.toString()
             }
         }
-        return result
     }
 
     /* 删除 */
-    suspend fun onDelete(): Boolean {
-        var result = false
-        if (Repository.deleteBike(bikeIndex)) {
-            message.value = app.getString(R.string.delete_success)
-            result = true
-        } else {
-            message.value = "未知错误"
+    fun onDeleteClicked() {
+        uiScope.launch {
+            delete()
         }
-        return result
+    }
+
+    private suspend fun delete() {
+        try {
+            Repository.deleteBikeInfo(bikeInfo)
+            message.value = app.getString(R.string.delete_success)
+            editSuccess.value = true
+        } catch (e: Exception) {
+            message.value = when (e) {
+                is ConnectException -> app.getString(R.string.exam_network)
+                else -> e.toString()
+            }
+        }
     }
 
     override fun onCleared() {
@@ -176,11 +196,11 @@ class BikeEditViewModel(
         viewModelJob.cancel()
     }
 
-    class Factory(val app: Application, val bikeInfo: BikeInfo, val bikeIndex: Int) :
+    class Factory(val app: Application, val bikeInfo: BikeInfo) :
         ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return BikeEditViewModel(app, bikeInfo.copy(), bikeIndex) as T
+            return BikeEditViewModel(app, bikeInfo) as T
         }
     }
 

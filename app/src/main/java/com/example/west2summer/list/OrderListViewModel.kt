@@ -1,27 +1,56 @@
 package com.example.west2summer.list
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import com.example.west2summer.R
 import com.example.west2summer.source.BikeInfo
-import com.example.west2summer.source.Network
+import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
-import com.example.west2summer.source.getDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.net.ConnectException
 
-class OrderListViewModel(app: Application) : AndroidViewModel(app) {
+class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
 
-    val records = getDatabase(app).orderRecordDao.getAll(User.currentUser.value!!.id)
+
+    val records = Transformations.map(Repository.orderRecordList) {
+        it?.filter { order ->
+            order.ownerId != User.currentUser.value!!.id || order.isUsed == 1
+        }
+    }
+
+    val message = MutableLiveData<String?>()
+
+    fun onMessageShowed() {
+        message.value = null
+    }
 
     private var viewModelJob = Job()
 
     val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
+    init {
+        uiScope.launch {
+            try {
+                Repository.refreshOrderRecordList(User.currentUser.value?.id!!)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     suspend fun getBikeInfo(id: Long): BikeInfo? {
-        return Network.service.getBikeAsync(id).await().bike
+        try {
+            return Repository.getBikeInfo(id)
+        } catch (e: Exception) {
+            message.value = when (e) {
+                is ConnectException -> app.getString(R.string.exam_network)
+                else -> e.toString()
+            }
+        }
+        return null
     }
 
     override fun onCleared() {

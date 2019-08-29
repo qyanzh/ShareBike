@@ -3,9 +3,12 @@ package com.example.west2summer.user
 import android.app.Application
 import androidx.lifecycle.*
 import com.example.west2summer.R
-import com.example.west2summer.source.Network
+import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 class UserInfoViewModel(val app: Application) : AndroidViewModel(app) {
@@ -40,47 +43,35 @@ class UserInfoViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     fun onDoneClicked() {
-        if (name.value.isNullOrBlank()) {
-            message.value = app.getString(R.string.please_enter_name)
-        } else if (address.value.isNullOrBlank()) {
-            message.value = app.getString(R.string.please_enter_address)
-        } else {
-            uiScope.launch {
+        when {
+            name.value.isNullOrBlank() -> message.value = app.getString(R.string.please_enter_name)
+            address.value.isNullOrBlank() -> message.value =
+                app.getString(R.string.please_enter_address)
+            else -> uiScope.launch {
                 modifyInfo()
             }
         }
     }
 
-    private suspend fun modifyInfo() {
-        withContext(Dispatchers.IO) {
-            try {
-                val user = User.currentUser.value?.copy(
-                    name = name.value,
-                    address = address.value,
-                    sex = sex.value,
-                    wechat = wechat.value,
-                    qq = qq.value,
-                    phone = phone.value
-                )?.also {
-                    val response =
-                        Network.service.updateUserAsync(it).await()
-                    if (response.msg == app.getString(R.string.user_response_ok)) {
-                        User.postCurrentUser(response.user!!)
-                        message.postValue(app.getString(R.string.modify_success))
-                        modifySuccess.postValue(true)
-                    } else {
-                        throw Exception(response.msg)
-                    }
-                }
-            } catch (e: Exception) {
-                message.postValue(
-                    if (e is ConnectException)
-                        app.getString(R.string.exam_network)
-                    else
-                        e.toString()
-                )
-            }
+    private suspend fun modifyInfo() = try {
+        User.currentUser.value?.copy(
+            name = name.value,
+            address = address.value,
+            sex = sex.value,
+            wechat = wechat.value,
+            qq = qq.value,
+            phone = phone.value
+        )?.also {
+            Repository.updateUserInfo(it)
+            message.value = app.getString(R.string.modify_success)
+            modifySuccess.value = true
         }
+    } catch (e: Exception) {
+        message.value =
+            if (e is ConnectException)
+                app.getString(R.string.exam_network)
+            else
+                e.toString()
     }
 
 
@@ -93,8 +84,6 @@ class UserInfoViewModel(val app: Application) : AndroidViewModel(app) {
     fun onModifySuccess() {
         modifySuccess.value = false
     }
-
-    val registerSuccess = MutableLiveData<Boolean>()
 
     class Factory(val app: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

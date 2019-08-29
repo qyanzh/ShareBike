@@ -14,7 +14,7 @@ class BikeListViewModel(app: Application) : AndroidViewModel(app) {
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    val bikes = getDatabase(app).bikeInfoDao.getAll()
+    val bikes = getDatabase(app).bikeInfoDao.getActiveBikes()
 
     override fun onCleared() {
         super.onCleared()

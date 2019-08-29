@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavOptions
 import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItem
 import com.amap.api.services.geocoder.*
@@ -20,6 +21,7 @@ import com.amap.api.services.help.Tip
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
 import com.bumptech.glide.Glide
+import com.example.west2summer.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.security.MessageDigest
@@ -33,6 +35,23 @@ import kotlin.coroutines.suspendCoroutine
 
 var shortTimeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
 var longTimeFormatter = SimpleDateFormat("yyyy年MM月dd日 HH:mm", Locale.getDefault())
+
+val defaultNavOptions = NavOptions.Builder()
+    .setLaunchSingleTop(true)
+    .setEnterAnim(R.anim.nav_default_enter_anim)
+    .setExitAnim(R.anim.nav_default_exit_anim)
+    .setPopEnterAnim(R.anim.nav_default_pop_enter_anim)
+    .setPopExitAnim(R.anim.nav_default_pop_exit_anim).build()
+
+const val SPF_FILE_NAME_USER = "user"
+const val SPF_USER_ID = "id"
+const val SPF_USER_PASSWORD = "password"
+
+const val RESPONSE_OK = "OK"
+const val RESPONSE_SAME = "same"
+const val RESPONSE_SUCCESS = "success"
+const val RESPONSE_DEFEAT = "defeat"
+
 
 fun <T> MutableLiveData<T>.notifyObserver() {
     this.postValue(this.value)
@@ -50,12 +69,14 @@ suspend fun toastUiScope(context: Context, msg: String) {
     }
 }
 
-fun String.isValidPassword(): Boolean {
-    if (length < 6) return false
-    return true
+fun String?.isValidPassword(): Boolean {
+    this?.let {
+        if (it.length >= 6) return true
+    }
+    return false
 }
 
-enum class LikeFabState {
+enum class LikeState {
     UNLIKE, LIKED, EDIT, NULL
 }
 
@@ -135,7 +156,11 @@ fun ImageView.glide(url: String?) {
 }
 
 //经纬度转地点
-suspend fun convertLatLngToPlace(context: Context, lat: Double, lng: Double): RegeocodeAddress =
+suspend fun convertLatLngToPlaceAsync(
+    context: Context,
+    lat: Double,
+    lng: Double
+): RegeocodeAddress =
     suspendCoroutine { cont ->
         GeocodeSearch(context).apply {
             setOnGeocodeSearchListener(object : GeocodeSearch.OnGeocodeSearchListener {
