@@ -59,6 +59,7 @@ class BikeDialogViewModel(
                 if (orderRecord.userId == User.currentUser.value?.id) {
                     _fabState.value = LikeState.LIKED
                     likeRecordId = orderRecord.id
+                    owner.value = Repository.getUserInfo(bikeInfo.ownerId)
                     break
                 }
             }

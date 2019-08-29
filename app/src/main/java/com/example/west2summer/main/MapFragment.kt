@@ -53,7 +53,6 @@ class MapFragment : Fragment() {
             .get(MapViewModel::class.java)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestPermission()
@@ -65,14 +64,21 @@ class MapFragment : Fragment() {
                 isZoomControlsEnabled = false
                 isRotateGesturesEnabled = false
             }
-            myLocationStyle = MyLocationStyle().apply {
-                myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE)
-            }
             if (haveLocatePermission()) {
                 isMyLocationEnabled = true
             }
+            myLocationStyle = MyLocationStyle().apply {
+                myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE)
+                interval(5000L)
+            }
             setOnMyLocationChangeListener {
-                moveCamera(CameraUpdateFactory.zoomTo(17f))
+                if (myLocationStyle.myLocationType == MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE) {
+                    myLocationStyle = MyLocationStyle().apply {
+                        myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER)
+                        interval(5000L)
+                    }
+                    moveCamera(CameraUpdateFactory.zoomTo(17f))
+                }
             }
         }
         mapView.onCreate(savedInstanceState)
@@ -113,9 +119,9 @@ class MapFragment : Fragment() {
             override fun getInfoContents(marker: Marker?) = null
 
             override fun getInfoWindow(marker: Marker?): View {
-                val place = marker?.title
-                val view = LayoutInflater.from(context).inflate(R.layout.map_marker_window, null)
-                view.findViewById<TextView>(R.id.tvPlace).text = place
+                val view =
+                    LayoutInflater.from(context).inflate(R.layout.map_marker_window, mapView, false)
+                view.findViewById<TextView>(R.id.tvPlace).text = marker?.title
                 return view
             }
         })
