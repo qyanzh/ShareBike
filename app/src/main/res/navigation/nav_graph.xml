@@ -89,5 +89,13 @@
             android:name="bikeinfo"
             app:argType="com.example.west2summer.source.BikeInfo" />
     </fragment>
+    <action
+        android:id="@+id/action_global_bikeListFragment"
+        app:destination="@id/bikeListFragment" />
+    <fragment
+        android:id="@+id/bikeListFragment"
+        android:name="com.example.west2summer.list.BikeListFragment"
+        android:label="@string/my_post"
+        tools:layout="@layout/bike_list_fragment" />
 
 </navigation>

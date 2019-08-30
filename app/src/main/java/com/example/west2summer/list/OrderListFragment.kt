@@ -65,6 +65,16 @@ class OrderListFragment : Fragment() {
     }
 
     private fun subscribeUi() {
+        binding.swipeRefresh.let {
+            it.setOnRefreshListener {
+                viewModel.refreshList()
+            }
+        }
+        viewModel.isRefreshing.observe(this, Observer {
+            it?.let {
+                binding.swipeRefresh.isRefreshing = it
+            }
+        })
         viewModel.message.observe(this, Observer {
             it?.let {
                 toast(context!!, it)

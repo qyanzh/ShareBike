@@ -54,6 +54,10 @@ interface Service {
     @GET("api/query/ev_bike/all")
     fun getAllBikesAsync(): Deferred<NetworkBikeList>
 
+    /* 我上传的车辆*/
+    @GET("api/query/ev_bike/owner_id/{owner_id}")
+    fun getMyBikesAsync(): Deferred<NetworkBikeList>
+
     /* ------流动信息------*/
 
     /* 根据车主获取流动记录*/
@@ -68,12 +72,24 @@ interface Service {
     @GET("api/query/ev_record/bike_id/{bike_id}")
     fun getRecordByBikeIdAsync(@Path("bike_id") bikeId: Long): Deferred<NetworkRecordList>
 
+    /* 添加流动记录（想要）*/
     @POST("api/ev_record/insert")
     fun sendLikeRequestAsync(@Body record: OrderRecord): Deferred<NetworkResponse>
 
+    /* 删除流动记录 （取消想要）*/
     @FormUrlEncoded
     @POST("api/ev_record/delete")
     fun deleteRecordAsync(@Field("id") id: Long): Deferred<NetworkResponse>
+
+    /* 确认租出*/
+    @FormUrlEncoded
+    @POST("api/ev_record/start_use/update")
+    fun startRentAsync(@Field("id") recordId: Long, @Field("bike_id") bikeId: Long): Deferred<NetworkResponse>
+
+    /* 结束租借*/
+    @FormUrlEncoded
+    @POST("api/ev_record/finish_use/update")
+    fun endRentAsync(@Field("id") recordId: Long, @Field("bike_id") bikeId: Long): Deferred<NetworkResponse>
 
     /* ------开发------*/
 
@@ -81,10 +97,12 @@ interface Service {
     @POST("api/ev_user/delete")
     fun deleteUserAsync(@Field("id") id: Long): Deferred<NetworkResponse>
 
+    @GET("api/query/ev_record/all")
+    fun getAllOrderRecordAsync(): Deferred<NetworkRecordList>
+
 }
 
 object Network {
-
 
     private val clientBuilder = OkHttpClient.Builder()
 
@@ -152,3 +170,5 @@ data class NetworkBikeId(
 
 class IdentifyErrorException : Exception()
 class RegisteredException : Exception()
+class RentedException : Exception()
+class UsingException : Exception()

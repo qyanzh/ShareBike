@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             uiScope.launch {
                 autoLogin()
-                refreshList()
             }
         }
     }
@@ -84,14 +83,6 @@ class MainActivity : AppCompatActivity() {
             Repository.autoLogin()
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-    }
-
-    private suspend fun refreshList() {
-        try {
-            Repository.refreshBikeList()
-        } catch (e: Exception) {
-            toast(this, getString(R.string.network_error))
         }
     }
 

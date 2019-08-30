@@ -6,19 +6,33 @@ import com.example.west2summer.R
 import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.net.ConnectException
 
 class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
 
+    val isRefreshing = MutableLiveData<Boolean?>()
+
+    fun refreshList() {
+        uiScope.launch {
+            try {
+                isRefreshing.value = true
+                Repository.refreshOrderRecordList(User.currentUser.value?.id!!)
+            } catch (e: Exception) {
+                message.value = app.getString(R.string.network_error)
+            } finally {
+                delay(800)
+                isRefreshing.value = false
+            }
+        }
+    }
 
     val records = Transformations.map(Repository.orderRecordList) {
-        it?.filter { order ->
-            order.ownerId != User.currentUser.value!!.id || order.isUsed == 1
-        }
+        val currentUserId = User.currentUser.value!!.id
+        (it?.filter { order ->
+            (order.ownerId == currentUserId && order.isUsed == 1) ||
+                    (order.userId == currentUserId)
+        } ?: listOf()).sortedByDescending { it.startTime }
     }
 
     val message = MutableLiveData<String?>()
@@ -34,7 +48,7 @@ class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
     init {
         uiScope.launch {
             try {
-                Repository.refreshOrderRecordList(User.currentUser.value?.id!!)
+                refreshList()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

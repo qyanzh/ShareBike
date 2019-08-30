@@ -11,6 +11,8 @@ class MainNavHeaderViewModel : ViewModel() {
         user.value?.name
     }
     val id = Transformations.map(user) {
-        user.value?.id?.toString()
+        it?.let {
+            String.format("%09d", user.value?.id)
+        }
     }
 }

@@ -4,7 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.west2summer.source.getDatabase
+import com.example.west2summer.source.Repository
+import com.example.west2summer.source.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,7 +15,7 @@ class BikeListViewModel(app: Application) : AndroidViewModel(app) {
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    val bikes = getDatabase(app).bikeInfoDao.getActiveBikes()
+    val bikes = Repository.myBikeList(User.currentUser.value?.id!!)
 
     override fun onCleared() {
         super.onCleared()

@@ -4,10 +4,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import com.example.west2summer.R
 import com.example.west2summer.component.LikeState
-import com.example.west2summer.source.BikeInfo
-import com.example.west2summer.source.OrderRecord
-import com.example.west2summer.source.Repository
-import com.example.west2summer.source.User
+import com.example.west2summer.source.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,11 +16,78 @@ class BikeDialogViewModel(
     val bikeInfo: BikeInfo
 ) : AndroidViewModel(app) {
 
+    var choseRecordId = -1L
+
+    fun setChoice(recordId: Long) {
+        choseRecordId = recordId
+    }
+
+    fun clearChoice() {
+        choseRecordId = -1
+    }
+
+    fun onConfirmRentClicked() {
+        if (choseRecordId != -1L) {
+            uiScope.launch {
+                try {
+                    Repository.startRent(choseRecordId, bikeInfo.id)
+                    refreshRecords()
+                    _fabState.value = LikeState.DONE
+                    message.value = app.getString(R.string.rent_out_success)
+                } catch (e: Exception) {
+                    message.value = when (e) {
+                        is ConnectException -> app.getString(R.string.exam_network)
+                        is RentedException -> app.getString(R.string.bike_rented)
+                        else -> e.toString()
+                    }
+                }
+            }
+        }
+    }
+
+    fun onEndRentClicked() {
+        records.value?.let {
+            for (record in it) {
+                if (record.isUsed == 1 && record.isFinished == 0) {
+                    uiScope.launch {
+                        try {
+                            Repository.endRent(record.id, record.bikeId)
+                            refreshRecords()
+                            _fabState.value = LikeState.EDIT
+                            message.value = app.getString(R.string.order_complete)
+                        } catch (e: Exception) {
+                            message.value = when (e) {
+                                is ConnectException -> app.getString(R.string.exam_network)
+                                else -> e.toString()
+                            }
+                        }
+                    }
+                    break
+                }
+            }
+        }
+    }
+
     private val viewModelJob = Job()
 
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
     val owner = MutableLiveData<User>()
-    private lateinit var records: List<OrderRecord>
+
+
+    val records = MutableLiveData<List<OrderRecord>?>().apply {
+        value = listOf()
+    }
+
+    val activeRecords = Transformations.map(records) {
+        it?.filter { order ->
+            order.isFinished == 0
+        } ?: listOf()
+    }
+
+    val recordsSize = Transformations.map(activeRecords) {
+        activeRecords.value?.size ?: 0
+    }
+
     var likeRecordId: Long = -1
 
     val message = MutableLiveData<String?>()
@@ -37,30 +101,60 @@ class BikeDialogViewModel(
     val fabState: LiveData<LikeState?>
         get() = _fabState
 
+    val shouldShowContact = Transformations.map(fabState) {
+        when (it) {
+            LikeState.NULL -> false
+            LikeState.UNLIKE -> false
+            else -> true
+        }
+    }
+
     init {
-        _fabState.value = LikeState.NULL
-        if (User.isLoginned()) {
-            if (User.currentUser.value!!.id == bikeInfo.ownerId) {
-                owner.value = User.currentUser.value!!
-                _fabState.value = LikeState.EDIT
-            } else {
-                uiScope.launch {
+        uiScope.launch {
+            refreshRecords()
+            if (User.isLoginned()) {
+                if (User.currentUser.value!!.id == bikeInfo.ownerId) {
+                    owner.value = User.currentUser.value!!
+                    if (bikeInfo.leaseStatus == 0) {
+                        _fabState.value = LikeState.EDIT
+                    } else {
+                        _fabState.value = LikeState.DONE
+                    }
+                } else {
                     checkLike()
                 }
+            } else {
+                _fabState.value = LikeState.NULL
+            }
+        }
+    }
+
+    private suspend fun refreshRecords() {
+        try {
+            records.value = Repository.getOrderRecords(bikeInfo.id)
+        } catch (e: Exception) {
+            message.value = when (e) {
+                is ConnectException -> app.getString(R.string.exam_network)
+                else -> e.toString()
             }
         }
     }
 
     private suspend fun checkLike() {
         try {
-            records = Repository.getOrderRecords(bikeInfo.id)
-            _fabState.value = LikeState.UNLIKE
-            for (orderRecord in records) {
-                if (orderRecord.userId == User.currentUser.value?.id) {
-                    _fabState.value = LikeState.LIKED
-                    likeRecordId = orderRecord.id
-                    owner.value = Repository.getUserInfo(bikeInfo.ownerId)
-                    break
+            if (User.isLoginned() && bikeInfo.ownerId != User.currentUser.value!!.id) {
+                _fabState.value = LikeState.UNLIKE
+                likeRecordId = -1
+                owner.value = null
+                for (orderRecord in records.value!!) {
+                    if (orderRecord.userId == User.currentUser.value?.id
+                        && orderRecord.isFinished == 0
+                    ) {
+                        _fabState.value = LikeState.LIKED
+                        likeRecordId = orderRecord.id
+                        owner.value = Repository.getUserInfo(bikeInfo.ownerId)
+                        break
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -81,12 +175,16 @@ class BikeDialogViewModel(
                         bikeInfo.ownerId,
                         User.currentUser.value!!.id
                     )
-                    //TODO：返回ID初始化id
-                    owner.value = Repository.getUserInfo(bikeInfo.ownerId)
-                    message.value = app.getString(R.string.liked)
-                    _fabState.value = LikeState.LIKED
+                    refreshRecords()
+                    checkLike()
+                    if (likeRecordId != -1L) {
+                        message.value = app.getString(R.string.liked)
+                    }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    message.value = when (e) {
+                        is ConnectException -> app.getString(R.string.exam_network)
+                        else -> e.toString()
+                    }
                 }
             }
         }
@@ -96,13 +194,16 @@ class BikeDialogViewModel(
         uiScope.launch {
             if (User.isLoginned()) {
                 try {
-                    Repository.sendUnlikeRequest(likeRecordId)
-                    owner.value = null
-                    message.value = app.getString(R.string.canceled)
-                    _fabState.value = LikeState.UNLIKE
+                    Repository.sendUnlikeRequest(likeRecordId, bikeInfo.id)
+                    refreshRecords()
+                    checkLike()
+                    if (likeRecordId == -1L) {
+                        message.value = app.getString(R.string.canceled)
+                    }
                 } catch (e: Exception) {
                     message.value = when (e) {
                         is ConnectException -> app.getString(R.string.exam_network)
+                        is UsingException -> app.getString(R.string.using_uncancelable)
                         else -> e.toString()
                     }
                 }

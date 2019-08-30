@@ -77,7 +77,7 @@ fun String?.isValidPassword(): Boolean {
 }
 
 enum class LikeState {
-    UNLIKE, LIKED, EDIT, NULL
+    UNLIKE, LIKED, EDIT, NULL, DONE
 }
 
 enum class EditState {
@@ -152,7 +152,7 @@ private fun getImagePath(context: Context, uri: Uri, selection: String?): String
 fun ImageView.glide(url: String?) {
     url?.let {
         Glide.with(this).load(url).into(this)
-    }
+    } ?: Glide.with(this).load(R.drawable.dummy_image).into(this)
 }
 
 //经纬度转地点

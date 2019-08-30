@@ -21,7 +21,8 @@ data class BikeInfo(
     @field:Json(name = "blocking_time") var avaTo: Long? = null,//截止时间
     @field:Json(name = "price") var price: Double? = null,//价格
     @field:Json(name = "note") var note: String? = null,//备注
-    @field:Json(name = "lease_status") var leaseStatus: Int = 0//租借状态
+    @field:Json(name = "lease_status") var leaseStatus: Int = 0,//租借状态
+    @field:Json(name = "image") var img: String? = null
 ) : Parcelable {
     private fun avaFromString(): String =
         shortTimeFormatter.format(avaFrom)
@@ -47,11 +48,18 @@ data class BikeInfo(
 
 @Dao
 interface BikeInfoDao {
+
+    @Query("select * from bike_info")
+    fun getAllBikes(): LiveData<List<BikeInfo>>
+
     @Query("select * from bike_info where leaseStatus = 0")
     fun getActiveBikes(): LiveData<List<BikeInfo>>
 
     @Query("select * from bike_info where id= :id")
-    fun get(id: Long): BikeInfo?
+    fun getByBikeId(id: Long): LiveData<BikeInfo?>
+
+    @Query("select * from bike_info where ownerId= :ownerId")
+    fun getBikesByOwnerId(ownerId: Long): LiveData<List<BikeInfo>>
 
     @Query("delete from bike_info")
     fun deleteAll()

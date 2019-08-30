@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.example.west2summer.R
 import com.example.west2summer.component.LikeState
+import com.example.west2summer.component.defaultNavOptions
 import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.BikeDialogFragmentBinding
 import com.example.west2summer.source.User
@@ -95,6 +97,31 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun subscribeUi() {
+        binding.likePeople.setOnClickListener {
+            if (viewModel.fabState.value == LikeState.EDIT) {
+                viewModel.activeRecords.value?.let { records ->
+                    records.map { record ->
+                        record.userId.toString()
+                    }.let { ids ->
+                        if (ids.isNotEmpty()) {
+                            MaterialAlertDialogBuilder(context!!, R.style.AlertDialogTheme)
+                                .setTitle(getString(R.string.choose_people))
+                                .setSingleChoiceItems(ids.toTypedArray(), -1) { dialog, index ->
+                                    viewModel.setChoice(records[index].id)
+                                }
+                                .setPositiveButton(getString(R.string.confirm_rent_out)) { dialog, index ->
+                                    viewModel.onConfirmRentClicked()
+                                    dialog.dismiss()
+                                }
+                                .setNegativeButton(getString(R.string.cancel)) { dialog, index ->
+                                    viewModel.clearChoice()
+                                    dialog.dismiss()
+                                }.show()
+                        }
+                    }
+                }
+            }
+        }
         viewModel.message.observe(this, Observer {
             it?.let {
                 toast(context!!, it)
@@ -102,12 +129,17 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
             }
         })
         viewModel.fabState.observe(this, Observer { state ->
+            Log.d(
+                "BikeDialogFragment", "subscribeUi: " +
+                        "${state?.name}"
+            )
             binding.fab.setImageResource(
                 when (state) {
-                    LikeState.NULL -> R.drawable.ic_favorite_border_black_24dp
                     LikeState.UNLIKE -> R.drawable.ic_favorite_border_black_24dp
-                    LikeState.LIKED -> R.drawable.ic_favorite_black_24dp
-                    else -> R.drawable.ic_mode_edit_black_24dp
+                    LikeState.LIKED -> R.drawable.ic_favorite_red_24dp
+                    LikeState.EDIT -> R.drawable.ic_mode_edit_black_24dp
+                    LikeState.DONE -> R.drawable.ic_done_black_24dp
+                    else -> R.drawable.ic_favorite_border_black_24dp
                 }
             )
         })
@@ -121,12 +153,24 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
                             viewModel.bikeInfo
                         )
                     )
-                    else -> {
+                    LikeState.DONE -> {
+                        MaterialAlertDialogBuilder(context!!, R.style.AlertDialogTheme)
+                            .setMessage(getString(R.string.confirm_returned))
+                            .setPositiveButton(getString(R.string.returned)) { dialog, _ ->
+                                viewModel.onEndRentClicked()
+                                dialog.dismiss()
+                            }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                                dialog.dismiss()
+                            }.show()
                     }
+                    else -> Unit
                 }
             } else {
                 toast(context!!, getString(R.string.please_login))
-                findNavController().navigate(BikeDialogFragmentDirections.actionGlobalLoginFragment())
+                findNavController().navigate(
+                    BikeDialogFragmentDirections.actionGlobalLoginFragment(),
+                    defaultNavOptions
+                )
             }
         }
         binding.wechat.setOnClickListener {

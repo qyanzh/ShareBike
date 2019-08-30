@@ -3,6 +3,9 @@ package com.example.west2summer
 import com.example.west2summer.component.toMD5
 import com.example.west2summer.source.NetworkUser
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.text.SimpleDateFormat
@@ -108,7 +111,31 @@ class ExampleUnitTest {
 
     @Test
     fun test() {
-        print(throwfun())
+        println(String.format("%d", 123L))
     }
 
+    @Test
+    fun main() {
+        GlobalScope.launch {
+            // launch a new coroutine in background and continue
+            test(3)
+            test(1)
+            test(2)
+        }
+        println("Hello,") // main thread continues while coroutine is delayed
+        Thread.sleep(8000L) // block main thread for 2 seconds to keep JVM alive
+    }
+
+    suspend fun test(id: Int) {
+        val involkTime = System.currentTimeMillis()
+        delay(id * 1000L)
+        println("test${id} : ${involkTime}")
+    }
+
+    @Test
+    fun time2() {
+        println(SimpleDateFormat("yyyy:MM:dd HH:mm:ss").format(Int.MAX_VALUE))
+        println(SimpleDateFormat("yyyy:MM:dd HH:mm:ss").format(Int.MAX_VALUE))
+        println(SimpleDateFormat("yyyy:MM:dd HH:mm:ss").format(Int.MAX_VALUE))
+    }
 }

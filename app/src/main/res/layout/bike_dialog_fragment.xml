@@ -41,29 +41,41 @@
                     android:paddingEnd="@dimen/bottom_sheet_start_margin"
                     tools:context=".dialog.BikeDialogFragment">
 
+                    <!--想租的人-->
+                    <TextView
+                        android:id="@+id/like_people"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:drawableStart="@drawable/ic_people_black_24dp"
+                        android:drawablePadding="16dp"
+                        android:gravity="center_vertical"
+                        android:minHeight="@dimen/bottom_sheet_item_height"
+                        android:text="@{@string/liked_people(viewModel.recordsSize)}"
+                        android:textSize="16sp"
+                        tools:text="想租的人" />
 
+                    <!--名字-->
+                    <TextView
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:drawableStart="@{viewModel.owner.sex==0?@drawable/ic_man_24dp:@drawable/ic_woman_24dp}"
+                        android:drawablePadding="16dp"
+                        android:gravity="center_vertical"
+                        android:minHeight="@dimen/bottom_sheet_item_height"
+                        android:text="@{viewModel.owner.name}"
+                        android:textSize="16sp"
+                        android:visibility="@{viewModel.owner.name == null ? View.GONE : View.VISIBLE}"
+                        tools:drawableStart="@drawable/ic_man_24dp"
+                        tools:text="Archer" />
                     <!--联系方式-->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:visibility="@{viewModel.fabState == LikeState.UNLIKE ? View.GONE : View.VISIBLE}">
-
-                        <!--名字-->
-                        <TextView
-                            android:id="@+id/name1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:drawableStart="@{viewModel.owner.sex==0?@drawable/ic_man_24dp:@drawable/ic_woman_24dp}"
-                            android:drawablePadding="16dp"
-                            android:gravity="center_vertical"
-                            android:minHeight="@dimen/bottom_sheet_item_height"
-                            android:text="@{viewModel.owner.name}"
-                            android:textSize="16sp"
-                            android:visibility="@{viewModel.owner.name == null ? View.GONE : View.VISIBLE}"
-                            tools:drawableStart="@drawable/ic_man_24dp"
-                            tools:text="Archer" />
+                        android:visibility="@{viewModel.shouldShowContact ? View.VISIBLE : View.GONE}">
 
                         <!--地址-->
                         <TextView
@@ -79,6 +91,7 @@
                             android:textSize="16sp"
                             android:visibility="@{viewModel.owner.address == null ? View.GONE : View.VISIBLE}"
                             tools:text="32#510" />
+
 
 
                         <!--微信-->
@@ -127,6 +140,7 @@
                             tools:text="18150632336" />
 
                     </LinearLayout>
+
 
 
                     <!--标题-->
@@ -220,9 +234,9 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="32dp"
                 android:layout_marginBottom="16dp"
-                android:src="@drawable/ic_favorite_border_black_24dp"
+                android:src="@drawable/ic_favorite_red_24dp"
                 android:text="@string/want_rent"
-                android:visibility="@{viewModel.bikeInfo.leaseStatus==0?View.VISIBLE:View.GONE}"
+                app:tint="@null"
                 app:layout_anchor="@+id/image"
                 app:layout_anchorGravity="end|bottom" />
 

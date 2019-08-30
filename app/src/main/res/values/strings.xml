@@ -93,5 +93,17 @@
     <string name="copied">已复制</string>
     <string name="qq_not_installed">未安装QQ</string>
     <string name="phone_not_installed">未找到电话应用, 已复制到剪切板</string>
+    <string name="liked_people">%d人正在想租</string>
+    <string name="confirm_rent_out">确认租出</string>
+    <string name="rent_out_success">确认租出成功，可以在历史订单中查看</string>
+    <string name="choose_people">选择确认租车的人</string>
+    <string name="bike_rented">这辆车已经租出过了</string>
+    <string name="order_complete">订单已完成</string>
+    <string name="refresh">刷新</string>
+    <string name="refresh_success">刷新成功</string>
+    <string name="confirm_returned">确认对方已经归还车辆？</string>
+    <string name="returned">已归还</string>
+    <string name="using_uncancelable">您正在使用这辆车，无法取消</string>
+    <string name="my_post">我发布的</string>
 
 </resources>

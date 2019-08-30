@@ -22,6 +22,9 @@ object Repository {
         database.bikeInfoDao.getActiveBikes()
     }
 
+    fun myBikeList(ownerId: Long) =
+        database.bikeInfoDao.getBikesByOwnerId(ownerId)
+
     val orderRecordList by lazy {
         database.orderRecordDao.getAll()
     }
@@ -33,6 +36,19 @@ object Repository {
             val bikes = response.bikes
             withContext(Dispatchers.IO) {
                 database.bikeInfoDao.deleteAll()
+                database.bikeInfoDao.insertAll(bikes)
+            }
+        } else {
+            throw Exception(response.msg)
+        }
+    }
+
+    @Throws(Exception::class)
+    suspend fun refreshMyBikes() {
+        val response = Network.service.getMyBikesAsync().await()
+        if (response.msg == RESPONSE_OK) {
+            val bikes = response.bikes
+            withContext(Dispatchers.IO) {
                 database.bikeInfoDao.insertAll(bikes)
             }
         } else {
@@ -205,12 +221,41 @@ object Repository {
     }
 
     @Throws(Exception::class)
-    suspend fun sendUnlikeRequest(id: Long) {
-        val response = Network.service.deleteRecordAsync(id).await()
-        if (response.msg == RESPONSE_SUCCESS) {
-            withContext(Dispatchers.IO) {
-                database.orderRecordDao.deleteById(id)
+    suspend fun sendUnlikeRequest(id: Long, bikeId: Long) {
+        //TODO 按record的id查询，删除前检查isFinished和isUsed状态
+        if (getBikeInfo(bikeId).leaseStatus == 0) {
+            val response = Network.service.deleteRecordAsync(id).await()
+            if (response.msg == RESPONSE_SUCCESS) {
+                withContext(Dispatchers.IO) {
+                    database.orderRecordDao.deleteById(id)
+                }
+            } else {
+                throw Exception(response.msg)
             }
+        } else {
+            throw UsingException()
+        }
+    }
+
+    @Throws(Exception::class)
+    suspend fun startRent(recordId: Long, bikeId: Long) {
+        if (getBikeInfo(bikeId).leaseStatus == 0) {
+            val response = Network.service.startRentAsync(recordId, bikeId).await()
+            if (response.msg == RESPONSE_SUCCESS) {
+                getBikeInfo(bikeId)
+            } else {
+                throw Exception(response.msg)
+            }
+        } else {
+            throw RentedException()
+        }
+    }
+
+    @Throws(Exception::class)
+    suspend fun endRent(recordId: Long, bikeId: Long) {
+        val response = Network.service.endRentAsync(recordId, bikeId).await()
+        if (response.msg == RESPONSE_SUCCESS) {
+            getBikeInfo(bikeId)
         } else {
             throw Exception(response.msg)
         }

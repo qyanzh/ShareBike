@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_marginTop="@dimen/status_bar_height"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:orientation="vertical">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -48,10 +48,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-
                     android:text="@{viewModel.id ?? @string/click_to_login}"
                     android:textSize="14sp"
-                    tools:text="031702420" />
+                    tools:text="31702420" />
             </LinearLayout>
 
             <ImageView

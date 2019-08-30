@@ -5,18 +5,38 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
+import com.example.west2summer.R
 import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.Repository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.IOException
 import kotlin.collections.set
 
 class MapViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+    val app: Application
+) : AndroidViewModel(app) {
+
+    val message = MutableLiveData<String?>()
+
+    fun onMessageShowed() {
+        message.value = null
+    }
+
+    val isRefreshing = MutableLiveData<Boolean?>()
+
+    fun refreshList() {
+        uiScope.launch {
+            try {
+                isRefreshing.value = true
+                Repository.refreshBikeList()
+            } catch (e: Exception) {
+                message.value = app.getString(R.string.network_error)
+            } finally {
+                delay(800)
+                isRefreshing.value = false
+            }
+        }
+    }
 
     private val infoList = Repository.activeBikeList
 

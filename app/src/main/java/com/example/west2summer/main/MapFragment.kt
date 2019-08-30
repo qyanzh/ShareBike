@@ -6,9 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -55,6 +53,7 @@ class MapFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         requestPermission()
         binding = MapFragmentBinding.inflate(layoutInflater)
         mapView = binding.mapView
@@ -81,6 +80,9 @@ class MapFragment : Fragment() {
                 }
             }
         }
+        if (savedInstanceState == null) {
+            viewModel.refreshList()
+        }
         mapView.onCreate(savedInstanceState)
     }
 
@@ -90,6 +92,7 @@ class MapFragment : Fragment() {
     ): View? {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
+        binding.swipeRefresh.isEnabled = false
         subscribeUi()
         return binding.root
     }
@@ -112,6 +115,19 @@ class MapFragment : Fragment() {
                     setIcon(iconAlphaMarker)
                     setupCenterMarkerInfoWindow()
                 }
+            }
+        })
+
+        viewModel.message.observe(this, Observer { msg ->
+            msg?.let {
+                toast(context!!, msg)
+                viewModel.onMessageShowed()
+            }
+        })
+
+        viewModel.isRefreshing.observe(this, Observer { refreshing ->
+            refreshing?.let {
+                binding.swipeRefresh.isRefreshing = it
             }
         })
 
@@ -182,7 +198,7 @@ class MapFragment : Fragment() {
         map.clear(true)
         viewModel.markerMapping.value?.entries?.forEach {
             if (User.currentUser.value?.id == it.value.ownerId) {
-                it.key.icon(iconRedMarker)
+                it.key.icon(iconYellowMarker)
             } else {
                 it.key.icon(iconBlueMarker)
             }
@@ -288,7 +304,7 @@ class MapFragment : Fragment() {
                     resources,
                     R.drawable.marker_yellow,
                     BitmapFactory.Options().apply {
-                        inDensity = 3000
+                        inDensity = 450
                     })
         )
     }
@@ -328,5 +344,21 @@ class MapFragment : Fragment() {
         )
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.refresh -> {
+                viewModel.refreshList()
+            }
+            else -> {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.map_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
 
 }

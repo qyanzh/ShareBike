@@ -5,10 +5,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.amap.api.maps.TextureMapView
-            android:id="@+id/mapView"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <com.amap.api.maps.TextureMapView
+
+                android:id="@+id/mapView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <ImageView
             android:id="@+id/center_marker"
@@ -28,6 +36,7 @@
             app:layout_anchor="@id/mapView"
             app:layout_anchorGravity="bottom|center_horizontal"
             android:src="@{viewModel.centerMarkerIsVisible?@drawable/ic_close_black_24dp:@drawable/ic_add_black_24dp}" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <data>
