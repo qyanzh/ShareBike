@@ -72,10 +72,9 @@ dependencies {
     //Room
     def room_version = "2.2.0-beta01" // 2.1.0 for latest stable version
     implementation "androidx.room:room-runtime:$room_version"
-    // For Kotlin use kapt instead of annotationProcessor
     kapt "androidx.room:room-compiler:$room_version"
-    // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
+
     //test
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     implementation 'org.mockito:mockito-android:3.0.0'

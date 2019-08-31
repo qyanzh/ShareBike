@@ -43,11 +43,6 @@
         android:label="@string/app_name"
         tools:layout="@layout/map_fragment">
         <action
-            android:id="@+id/action_map_fragment_to_bike_info_dialog"
-            app:destination="@id/bike_info_dialog"
-            app:enterAnim="@anim/bottom_sheet_slide_in"
-            app:exitAnim="@anim/bottom_sheet_slide_out" />
-        <action
             android:id="@+id/action_map_fragment_to_editBikeInfoFragment"
             app:destination="@id/editBikeInfoFragment" />
     </fragment>
@@ -55,7 +50,11 @@
         android:id="@+id/userInfoFragment"
         android:name="com.example.west2summer.user.UserInfoFragment"
         android:label="@string/personal_info"
-        tools:layout="@layout/user_info_fragment" />
+        tools:layout="@layout/user_info_fragment">
+        <action
+            android:id="@+id/action_userInfoFragment_to_updatePasswordDialogFragment"
+            app:destination="@id/updatePasswordDialogFragment" />
+    </fragment>
     <action
         android:id="@+id/action_global_userInfoFragment"
         app:destination="@id/userInfoFragment" />
@@ -63,11 +62,7 @@
         android:id="@+id/orderListFragment"
         android:name="com.example.west2summer.list.OrderListFragment"
         android:label="@string/history_order"
-        tools:layout="@layout/order_list_fragment">
-        <action
-            android:id="@+id/action_orderListFragment_to_bike_info_dialog"
-            app:destination="@id/bike_info_dialog" />
-    </fragment>
+        tools:layout="@layout/order_list_fragment" />
     <dialog
         android:id="@+id/bike_info_dialog"
         android:name="com.example.west2summer.dialog.BikeDialogFragment"
@@ -97,5 +92,10 @@
         android:name="com.example.west2summer.list.BikeListFragment"
         android:label="@string/my_post"
         tools:layout="@layout/bike_list_fragment" />
+    <dialog
+        tools:layout="@layout/update_password_dialog_fragment"
+        android:id="@+id/updatePasswordDialogFragment"
+        android:name="com.example.west2summer.user.UpdatePasswordDialogFragment"
+        android:label="@string/change_password" />
 
 </navigation>

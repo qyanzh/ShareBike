@@ -281,5 +281,17 @@ object Repository {
         }
     }
 
+    @Throws(Exception::class)
+    suspend fun updatePassword(id: Long, password: String) {
+        val response = Network.service.updatePasswordAsync(id, password).await()
+        if (response.msg == RESPONSE_SUCCESS) {
+            saveAccount(id, password)
+            User.postCurrentUser(getUserInfo(id))
+        } else {
+            throw Exception(response.msg)
+
+        }
+    }
+
 
 }

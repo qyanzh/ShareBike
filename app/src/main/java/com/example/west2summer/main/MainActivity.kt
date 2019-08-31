@@ -1,18 +1,13 @@
 package com.example.west2summer.main
 
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
@@ -35,16 +30,8 @@ import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
-    private var permissionRequestCount: Int = 0
-    private val MAX_NUMBER_REQUEST_PERMISSIONS = 2
     private val REQUEST_CODE_AVATAR = 100
-    private val REQUEST_CODE_PERMISSIONS = 101
-    private val KEY_PERMISSIONS_REQUEST_COUNT = "KEY_PERMISSIONS_REQUEST_COUNT"
 
-    private val permissions = listOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
 
     private val job = Job()
 
@@ -70,7 +57,6 @@ class MainActivity : AppCompatActivity() {
             this,
             R.layout.activity_main
         )
-        requestPermissionsIfNecessary()
         navHeaderView = binding.navigationView.getHeaderView(0)
         navBinding = ActivityMainNavHeaderBinding.bind(navHeaderView)
         subscribeUi()
@@ -80,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
 
         savedInstanceState?.let {
-            permissionRequestCount = it.getInt(KEY_PERMISSIONS_REQUEST_COUNT, 0)
         } ?: uiScope.launch { autoLogin() }
     }
 
@@ -119,48 +104,6 @@ class MainActivity : AppCompatActivity() {
         MyNavigationUI.setupWithNavController(binding.navigationView, navController)
     }
 
-    private fun requestPermissionsIfNecessary() {
-        if (!checkAllPermissions()) {
-            if (permissionRequestCount < MAX_NUMBER_REQUEST_PERMISSIONS) {
-                permissionRequestCount += 1
-                ActivityCompat.requestPermissions(
-                    this,
-                    permissions.toTypedArray(),
-                    REQUEST_CODE_PERMISSIONS
-                )
-            } else {
-                Toast.makeText(
-                    this,
-                    getString(R.string.set_permissions_in_settings),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
-
-    private fun checkAllPermissions(): Boolean {
-        var hasPermissions = true
-        for (permission in permissions) {
-            hasPermissions = hasPermissions and isPermissionGranted(permission)
-        }
-        return hasPermissions
-    }
-
-    private fun isPermissionGranted(permission: String) =
-        ContextCompat.checkSelfPermission(this, permission) ==
-                PackageManager.PERMISSION_GRANTED
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            requestPermissionsIfNecessary() // no-op if permissions are granted already.
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -194,11 +137,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(KEY_PERMISSIONS_REQUEST_COUNT, permissionRequestCount)
     }
 
 }

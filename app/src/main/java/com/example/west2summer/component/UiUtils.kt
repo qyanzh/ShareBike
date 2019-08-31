@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.text.TextUtils
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavOptions
@@ -82,8 +81,12 @@ private fun getImagePath(context: Context, uri: Uri, selection: String?): String
     return path
 }
 
-fun toMD5(string: String): String {
-    if (TextUtils.isEmpty(string)) {
+fun String?.toMD5(): String {
+    return convertMD5(this)
+}
+
+private fun convertMD5(string: String?): String {
+    if (string.isNullOrEmpty()) {
         return ""
     }
     val md5: MessageDigest?

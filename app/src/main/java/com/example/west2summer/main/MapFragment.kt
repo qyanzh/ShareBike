@@ -1,11 +1,14 @@
 package com.example.west2summer.main
 
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.*
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -50,10 +53,10 @@ class MapFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        requestPermissionsIfNecessary()
         binding = MapFragmentBinding.inflate(layoutInflater)
         mapView = binding.mapView
         amap = mapView.map.apply {
-            isMyLocationEnabled = true
             myLocationStyle = MyLocationStyle().apply {
                 myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE)
                 interval(5000L)
@@ -72,9 +75,12 @@ class MapFragment : Fragment() {
                 isZoomControlsEnabled = false
                 isRotateGesturesEnabled = false
             }
+            isMyLocationEnabled = true
         }
         mapView.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
+        if (savedInstanceState != null) {
+            permissionRequestCount = savedInstanceState.getInt(KEY_PERMISSIONS_REQUEST_COUNT, 0)
+        } else {
             viewModel.refreshList()
         }
     }
@@ -162,7 +168,7 @@ class MapFragment : Fragment() {
             if (it != centerMarker || viewModel.centerMarkerIsVisible.value == false) {
                 amap.animateCamera(CameraUpdateFactory.newLatLng(it.position))
                 findNavController().navigate(
-                    MapFragmentDirections.actionMapFragmentToBikeInfoDialog(
+                    MapFragmentDirections.actionGlobalBikeInfoDialog(
                         viewModel.markerMapping.value!![it.options]!!
                     )
                 )
@@ -245,6 +251,7 @@ class MapFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+        outState.putInt(KEY_PERMISSIONS_REQUEST_COUNT, permissionRequestCount)
     }
 
     override fun onDestroy() {
@@ -297,5 +304,56 @@ class MapFragment : Fragment() {
                         inDensity = 450
                     })
         )
+    }
+
+    /* 权限*/
+
+    private var permissionRequestCount: Int = 0
+    private val MAX_NUMBER_REQUEST_PERMISSIONS = 2
+    private val REQUEST_CODE_PERMISSIONS = 101
+    private val KEY_PERMISSIONS_REQUEST_COUNT = "KEY_PERMISSIONS_REQUEST_COUNT"
+
+    private val permissions = listOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+
+    private fun requestPermissionsIfNecessary() {
+        if (!checkAllPermissions()) {
+            if (permissionRequestCount < MAX_NUMBER_REQUEST_PERMISSIONS) {
+                permissionRequestCount += 1
+                requestPermissions(
+                    permissions.toTypedArray(),
+                    REQUEST_CODE_PERMISSIONS
+                )
+            } else {
+                toast(context!!, getString(R.string.set_permissions_in_settings))
+            }
+        }
+    }
+
+    private fun checkAllPermissions(): Boolean {
+        var hasPermissions = true
+        for (permission in permissions) {
+            hasPermissions = hasPermissions and isPermissionGranted(permission)
+        }
+        return hasPermissions
+    }
+
+    private fun isPermissionGranted(permission: String) =
+        ContextCompat.checkSelfPermission(context!!, permission) ==
+                PackageManager.PERMISSION_GRANTED
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        amap.isMyLocationEnabled = false
+        amap.isMyLocationEnabled = true
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            requestPermissionsIfNecessary() // no-op if permissions are granted already.
+        }
     }
 }

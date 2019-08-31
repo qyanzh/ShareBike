@@ -11,6 +11,7 @@ import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.UserInfoFragmentBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
+
 class UserInfoFragment : EditBaseFragment() {
 
     private lateinit var binding: UserInfoFragmentBinding
@@ -71,10 +72,10 @@ class UserInfoFragment : EditBaseFragment() {
             R.id.modify_done -> {
                 viewModel.onDoneClicked()
             }
-            R.id.change_password -> {
-                //TODO:修改密码
-            }
-
+            R.id.change_password ->
+                findNavController().navigate(
+                    UserInfoFragmentDirections.actionUserInfoFragmentToUpdatePasswordDialogFragment()
+                )
             android.R.id.home -> requireActivity().onBackPressed()
         }
         return true

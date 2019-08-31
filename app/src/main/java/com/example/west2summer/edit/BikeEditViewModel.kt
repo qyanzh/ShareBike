@@ -159,17 +159,6 @@ class BikeEditViewModel(
         }
     }
 
-    private fun uploadImg(id: Long, path: String) {
-        val data = Data.Builder()
-            .putLong("bikeId", id)
-            .putString("path", path)
-            .build()
-        val uploadRequest = OneTimeWorkRequestBuilder<ImageUploadWorker>()
-            .setInputData(data)
-            .build()
-        workManager.enqueue(uploadRequest)
-    }
-
     /*提交*/
     private suspend fun submit() {
         try {
@@ -194,6 +183,17 @@ class BikeEditViewModel(
                 else -> e.toString()
             }
         }
+    }
+
+    private fun uploadImg(id: Long, path: String) {
+        val data = Data.Builder()
+            .putLong("bikeId", id)
+            .putString("path", path)
+            .build()
+        val uploadRequest = OneTimeWorkRequestBuilder<ImageUploadWorker>()
+            .setInputData(data)
+            .build()
+        workManager.enqueue(uploadRequest)
     }
 
     /* 删除 */

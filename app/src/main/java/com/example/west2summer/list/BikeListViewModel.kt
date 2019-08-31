@@ -1,10 +1,7 @@
 package com.example.west2summer.list
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.example.west2summer.R
 import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
@@ -14,6 +11,12 @@ class BikeListViewModel(val app: Application) : AndroidViewModel(app) {
 
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    val bikes = Repository.myBikeList(User.currentUser.value?.id!!)
+
+    val isBlank = Transformations.map(bikes) {
+        it?.isEmpty()
+    }
 
     init {
         uiScope.launch {
@@ -46,8 +49,6 @@ class BikeListViewModel(val app: Application) : AndroidViewModel(app) {
             }
         }
     }
-
-    val bikes = Repository.myBikeList(User.currentUser.value?.id!!)
 
     override fun onCleared() {
         super.onCleared()

@@ -11,6 +11,32 @@ import java.net.ConnectException
 
 class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
 
+    private var job = Job()
+
+    val uiScope = CoroutineScope(Dispatchers.Main + job)
+
+    val records = Transformations.map(Repository.orderRecordList) {
+        val currentUserId = User.currentUser.value!!.id
+        (it?.filter { order ->
+            (order.ownerId == currentUserId && order.isUsed == 1) ||
+                    (order.userId == currentUserId)
+        } ?: listOf()).sortedByDescending { it.startTime }
+    }
+
+    val isBlank = Transformations.map(records) {
+        it?.isEmpty()
+    }
+
+    init {
+        uiScope.launch {
+            try {
+                refreshList()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     val isRefreshing = MutableLiveData<Boolean?>()
 
     fun refreshList() {
@@ -27,33 +53,12 @@ class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    val records = Transformations.map(Repository.orderRecordList) {
-        val currentUserId = User.currentUser.value!!.id
-        (it?.filter { order ->
-            (order.ownerId == currentUserId && order.isUsed == 1) ||
-                    (order.userId == currentUserId)
-        } ?: listOf()).sortedByDescending { it.startTime }
-    }
-
     val message = MutableLiveData<String?>()
 
     fun onMessageShowed() {
         message.value = null
     }
 
-    private var viewModelJob = Job()
-
-    val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-
-    init {
-        uiScope.launch {
-            try {
-                refreshList()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     suspend fun getBikeInfo(id: Long): BikeInfo? {
         try {
@@ -69,7 +74,7 @@ class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
 
     override fun onCleared() {
         super.onCleared()
-        viewModelJob.cancel()
+        job.cancel()
     }
 
     class Factory(

@@ -34,6 +34,14 @@ interface Service {
     @POST("api/ev_user/update")
     fun updateUserAsync(@Body user: User): Deferred<NetworkUser>
 
+    /* 修改密码*/
+    @FormUrlEncoded
+    @POST("api/ev_user/password/update")
+    fun updatePasswordAsync(
+        @Field("id") id: Long,
+        @Field("password") password: String
+    ): Deferred<NetworkResponse>
+
     /* ------车辆------*/
 
     /* 插入车辆*/
@@ -61,13 +69,13 @@ interface Service {
     @GET("api/query/ev_bike/owner_id/{owner_id}")
     fun getMyBikesAsync(@Path("owner_id") ownerId: Long): Deferred<NetworkBikeList>
 
+    /* 更新租借状态*/
     @FormUrlEncoded
     @POST("api/ev_bike/lease_status/update")
     fun updateLeaseStatusAsync(
         @Field("id") id: Long,
         @Field("lease_status") leaseState: Int
     ): Deferred<ResponseBody>
-
 
     /* ------流动信息------*/
 
@@ -207,3 +215,4 @@ class RegisteredException : Exception()
 class RentedException : Exception()
 class UsingException : Exception()
 class UseCompletedException : Exception()
+class WrongPasswordException : Exception()

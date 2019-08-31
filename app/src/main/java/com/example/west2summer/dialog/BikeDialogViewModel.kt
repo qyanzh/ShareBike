@@ -16,6 +16,48 @@ class BikeDialogViewModel(
     val bikeInfo: BikeInfo
 ) : AndroidViewModel(app) {
 
+    private val viewModelJob = Job()
+
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    val owner = MutableLiveData<User>()
+
+    val records = MutableLiveData<List<OrderRecord>?>().apply {
+        value = listOf()
+    }
+
+    val activeRecords = Transformations.map(records) {
+        it?.filter { order ->
+            order.isFinished == 0
+        } ?: listOf()
+    }
+
+    val recordsSize = Transformations.map(activeRecords) {
+        activeRecords.value?.size ?: 0
+    }
+
+    init {
+        uiScope.launch {
+            refreshRecords()
+            if (User.isLoginned()) {
+                if (User.currentUser.value!!.id == bikeInfo.ownerId) {
+                    owner.value = User.currentUser.value!!
+                    if (bikeInfo.leaseStatus == 0) {
+                        _fabState.value = LikeState.EDIT
+                    } else {
+                        _fabState.value = LikeState.DONE
+                    }
+                } else {
+                    checkLike()
+                }
+            } else {
+                _fabState.value = LikeState.NULL
+            }
+        }
+    }
+
+    var likeRecordId = -1L
+
     var choseRecordId = -1L
 
     fun setChoice(recordId: Long) {
@@ -68,28 +110,6 @@ class BikeDialogViewModel(
         }
     }
 
-    private val viewModelJob = Job()
-
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-    val owner = MutableLiveData<User>()
-
-
-    val records = MutableLiveData<List<OrderRecord>?>().apply {
-        value = listOf()
-    }
-
-    val activeRecords = Transformations.map(records) {
-        it?.filter { order ->
-            order.isFinished == 0
-        } ?: listOf()
-    }
-
-    val recordsSize = Transformations.map(activeRecords) {
-        activeRecords.value?.size ?: 0
-    }
-
-    var likeRecordId: Long = -1
-
     val message = MutableLiveData<String?>()
 
     fun onMessageShowed() {
@@ -106,26 +126,6 @@ class BikeDialogViewModel(
             LikeState.NULL -> false
             LikeState.UNLIKE -> false
             else -> true
-        }
-    }
-
-    init {
-        uiScope.launch {
-            refreshRecords()
-            if (User.isLoginned()) {
-                if (User.currentUser.value!!.id == bikeInfo.ownerId) {
-                    owner.value = User.currentUser.value!!
-                    if (bikeInfo.leaseStatus == 0) {
-                        _fabState.value = LikeState.EDIT
-                    } else {
-                        _fabState.value = LikeState.DONE
-                    }
-                } else {
-                    checkLike()
-                }
-            } else {
-                _fabState.value = LikeState.NULL
-            }
         }
     }
 
@@ -165,7 +165,6 @@ class BikeDialogViewModel(
         }
     }
 
-
     fun sendLikeRequest() {
         uiScope.launch {
             if (User.isLoginned()) {
@@ -194,7 +193,7 @@ class BikeDialogViewModel(
         uiScope.launch {
             if (User.isLoginned()) {
                 try {
-                    Repository.sendUnlikeRequest(likeRecordId, bikeInfo.id)
+                    Repository.sendUnlikeRequest(likeRecordId)
                     refreshRecords()
                     checkLike()
                     if (likeRecordId == -1L) {

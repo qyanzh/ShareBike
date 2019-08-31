@@ -20,14 +20,7 @@ data class OrderRecord(
     @PrimaryKey
     @field:Json(name = "id")
     var id: Long = -1
-) {
-
-    fun isUsing() = isUsed == 1 && isFinished == 0
-
-//    fun formattedStartTime() = longTimeFormatter.format(startTime)
-//    fun formattedEndTime() = longTimeFormatter.format(endTime)
-
-}
+)
 
 @Dao
 interface OrderRecordDao {

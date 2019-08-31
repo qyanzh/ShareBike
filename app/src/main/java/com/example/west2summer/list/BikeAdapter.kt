@@ -53,7 +53,6 @@ class BikeDiffCallback : DiffUtil.ItemCallback<BikeInfo>() {
         return oldItem == newItem
     }
 
-
 }
 
 class BikeListener(val clickListener: (order: BikeInfo) -> Unit) {

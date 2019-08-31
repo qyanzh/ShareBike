@@ -83,7 +83,6 @@ class OrderRecordDiffCallback : DiffUtil.ItemCallback<OrderRecord>() {
         return oldItem == newItem
     }
 
-
 }
 
 class OrderRecordListener(val clickListener: (order: OrderRecord) -> Unit) {

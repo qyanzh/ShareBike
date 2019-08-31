@@ -9,10 +9,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:background="@color/list_background"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/list_background">
+
+            <ImageView
+
+                android:visibility="@{viewModel.isBlank==true?View.VISIBLE:View.GONE}"
+                android:layout_centerInParent="true"
+                android:src="@drawable/img_bg_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
@@ -23,11 +31,12 @@
 
             </androidx.recyclerview.widget.RecyclerView>
 
-        </LinearLayout>
+        </RelativeLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <data>
 
+        <import type="android.view.View" />
         <variable
             name="viewModel"
             type="com.example.west2summer.list.BikeListViewModel" />

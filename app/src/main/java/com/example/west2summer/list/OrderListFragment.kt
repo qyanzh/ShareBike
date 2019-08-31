@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
  */
 class OrderListFragment : Fragment() {
 
+    lateinit var binding: OrderListFragmentBinding
+
     private val viewModel: OrderListViewModel by lazy {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
@@ -30,8 +32,6 @@ class OrderListFragment : Fragment() {
         )
             .get(OrderListViewModel::class.java)
     }
-
-    lateinit var binding: OrderListFragmentBinding
 
 
     override fun onCreateView(
