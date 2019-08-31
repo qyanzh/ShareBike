@@ -105,5 +105,8 @@
     <string name="returned">已归还</string>
     <string name="using_uncancelable">您正在使用这辆车，无法取消</string>
     <string name="my_post">我发布的</string>
+    <string name="bike_deleted">车辆信息已被车主删除</string>
+    <string name="set_permissions_in_settings">请在设置中开启位置和存储权限</string>
+    <string name="used_uncancelable">您已使用完毕，无法取消</string>
 
 </resources>

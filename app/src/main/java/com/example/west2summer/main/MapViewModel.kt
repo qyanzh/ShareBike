@@ -1,7 +1,6 @@
 package com.example.west2summer.main
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.*
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
@@ -9,17 +8,28 @@ import com.example.west2summer.R
 import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.Repository
 import kotlinx.coroutines.*
-import java.io.IOException
 import kotlin.collections.set
 
 class MapViewModel(
     val app: Application
 ) : AndroidViewModel(app) {
 
-    val message = MutableLiveData<String?>()
+    private val viewModelJob = Job()
 
-    fun onMessageShowed() {
-        message.value = null
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    private val infoList = Repository.activeBikeList
+
+    var markerMapping = Transformations.map(infoList) {
+        val map = HashMap<MarkerOptions, BikeInfo>()
+        infoList.value?.forEach { info ->
+            info.let {
+                val latLng = LatLng(info.lat, info.lng)
+                val markerOptions = MarkerOptions().position(latLng)
+                map[markerOptions] = info
+            }
+        }
+        map
     }
 
     val isRefreshing = MutableLiveData<Boolean?>()
@@ -38,39 +48,10 @@ class MapViewModel(
         }
     }
 
-    private val infoList = Repository.activeBikeList
+    val message = MutableLiveData<String?>()
 
-    var markerMapping = Transformations.map(infoList) {
-        val map = HashMap<MarkerOptions, BikeInfo>()
-        infoList.value?.forEach { info ->
-            info.let {
-                val latLng = LatLng(info.lat, info.lng)
-                val markerOptions = MarkerOptions().position(latLng)
-                map[markerOptions] = info
-            }
-        }
-        map
-    }
-
-    private val viewModelJob = Job()
-
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-
-    init {
-        refreshDataFromRepository()
-    }
-
-    private fun refreshDataFromRepository() {
-        uiScope.launch {
-            try {
-//                repository.fakeRefreshBikeInfos(getApplication())
-            } catch (networkError: IOException) {
-                Log.d(
-                    "MapViewModel", "refreshDataFromRepository: " +
-                            "network error"
-                )
-            }
-        }
+    fun onMessageShowed() {
+        message.value = null
     }
 
     private val _fabStatus = MutableLiveData<Boolean>().apply {

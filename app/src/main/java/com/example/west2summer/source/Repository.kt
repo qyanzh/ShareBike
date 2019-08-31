@@ -44,8 +44,8 @@ object Repository {
     }
 
     @Throws(Exception::class)
-    suspend fun refreshMyBikes() {
-        val response = Network.service.getMyBikesAsync().await()
+    suspend fun refreshMyBikes(ownerId: Long) {
+        val response = Network.service.getMyBikesAsync(ownerId).await()
         if (response.msg == RESPONSE_OK) {
             val bikes = response.bikes
             withContext(Dispatchers.IO) {
@@ -125,13 +125,14 @@ object Repository {
     }
 
     @Throws(Exception::class)
-    suspend fun insertBikeInfo(bikeInfo: BikeInfo) {
+    suspend fun insertBikeInfo(bikeInfo: BikeInfo): Long {
         val response = Network.service.insertBikeAsync(bikeInfo).await()
         if (response.msg == RESPONSE_OK) {
             bikeInfo.id = response.id!!
             withContext(Dispatchers.IO) {
                 database.bikeInfoDao.insert(bikeInfo)
             }
+            return bikeInfo.id
         } else {
             throw Exception(response.msg)
         }
@@ -178,6 +179,21 @@ object Repository {
     }
 
     @Throws(Exception::class)
+    suspend fun getOrderRecord(id: Long): OrderRecord {
+        val response = Network.service.getRecordByIdAsync(id).await()
+        if (response.msg == RESPONSE_OK) {
+            requireNotNull(response.record).let {
+                withContext(Dispatchers.IO) {
+                    database.orderRecordDao.insert(it)
+                }
+                return it
+            }
+        } else {
+            throw Exception(response.msg)
+        }
+    }
+
+    @Throws(Exception::class)
     suspend fun refreshOrderRecordList(id: Long) {
         val response1 = Network.service.getRecordByOwnerIdAsync(id).await()
         val response2 = Network.service.getRecordByUserIdAsync(id).await()
@@ -212,7 +228,7 @@ object Repository {
         val response = Network.service.sendLikeRequestAsync(orderRecord).await()
         if (response.msg == RESPONSE_SUCCESS) {
             withContext(Dispatchers.IO) {
-                //TODO: 返回ID 添加到数据库
+                //TODO_:返回ID 添加到数据库
 //                database.orderRecordDao.insert(orderRecord)
             }
         } else {
@@ -221,9 +237,9 @@ object Repository {
     }
 
     @Throws(Exception::class)
-    suspend fun sendUnlikeRequest(id: Long, bikeId: Long) {
-        //TODO 按record的id查询，删除前检查isFinished和isUsed状态
-        if (getBikeInfo(bikeId).leaseStatus == 0) {
+    suspend fun sendUnlikeRequest(id: Long) {
+        val record = getOrderRecord(id)
+        if (record.isUsed == 0 && record.isFinished == 0) {
             val response = Network.service.deleteRecordAsync(id).await()
             if (response.msg == RESPONSE_SUCCESS) {
                 withContext(Dispatchers.IO) {
@@ -233,7 +249,11 @@ object Repository {
                 throw Exception(response.msg)
             }
         } else {
-            throw UsingException()
+            if (record.isFinished == 1) {
+                throw UseCompletedException()
+            } else {
+                throw UsingException()
+            }
         }
     }
 

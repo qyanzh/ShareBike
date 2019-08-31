@@ -101,7 +101,7 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
             if (viewModel.fabState.value == LikeState.EDIT) {
                 viewModel.activeRecords.value?.let { records ->
                     records.map { record ->
-                        record.userId.toString()
+                        String.format("%09d", record.userId)
                     }.let { ids ->
                         if (ids.isNotEmpty()) {
                             MaterialAlertDialogBuilder(context!!, R.style.AlertDialogTheme)

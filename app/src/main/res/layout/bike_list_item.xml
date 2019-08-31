@@ -33,11 +33,11 @@
                 android:id="@+id/circleImageView"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
-                app:glide="@{bikeinfo.img}"
+                app:glide_avatar="@{bikeinfo.img}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:src="@drawable/dummy_image" />
+                tools:src="@drawable/image_android_q" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

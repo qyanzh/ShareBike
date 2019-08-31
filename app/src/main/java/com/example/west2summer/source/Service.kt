@@ -4,11 +4,14 @@ import com.example.west2summer.BuildConfig
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Json
 import kotlinx.coroutines.Deferred
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
+
 
 interface Service {
 
@@ -56,9 +59,21 @@ interface Service {
 
     /* 我上传的车辆*/
     @GET("api/query/ev_bike/owner_id/{owner_id}")
-    fun getMyBikesAsync(): Deferred<NetworkBikeList>
+    fun getMyBikesAsync(@Path("owner_id") ownerId: Long): Deferred<NetworkBikeList>
+
+    @FormUrlEncoded
+    @POST("api/ev_bike/lease_status/update")
+    fun updateLeaseStatusAsync(
+        @Field("id") id: Long,
+        @Field("lease_status") leaseState: Int
+    ): Deferred<ResponseBody>
+
 
     /* ------流动信息------*/
+
+    /* 根据id查询流动记录*/
+    @GET("api/query/ev_record/id/{id}")
+    fun getRecordByIdAsync(@Path("id") id: Long): Deferred<NetworkRecord>
 
     /* 根据车主获取流动记录*/
     @GET("api/query/ev_record/owner_id/{owner_id}")
@@ -90,6 +105,17 @@ interface Service {
     @FormUrlEncoded
     @POST("api/ev_record/finish_use/update")
     fun endRentAsync(@Field("id") recordId: Long, @Field("bike_id") bikeId: Long): Deferred<NetworkResponse>
+
+
+    /* ------图片上传------*/
+
+    @Multipart
+    @POST("upload/setFileUpload")
+    fun uploadFileAsync(
+        @Part("id") id: Long,
+        @Part file: MultipartBody.Part
+    ): Deferred<ResponseBody>
+
 
     /* ------开发------*/
 
@@ -160,6 +186,14 @@ data class NetworkRecordList(
     val ok: String?
 )
 
+data class NetworkRecord(
+    val status: Int?,
+    val msg: String?,//OK
+    @field:Json(name = "data")
+    val record: OrderRecord,
+    val ok: String?
+)
+
 data class NetworkBikeId(
     val status: Int?,
     val msg: String?,//OK
@@ -172,3 +206,4 @@ class IdentifyErrorException : Exception()
 class RegisteredException : Exception()
 class RentedException : Exception()
 class UsingException : Exception()
+class UseCompletedException : Exception()

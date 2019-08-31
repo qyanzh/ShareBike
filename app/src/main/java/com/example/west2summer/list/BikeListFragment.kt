@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.BikeListFragmentBinding
 
 /**
@@ -47,8 +48,28 @@ class BikeListFragment : Fragment() {
             }
         })
         binding.lifecycleOwner = this
+        subscribeUi()
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun subscribeUi() {
+        binding.swipeRefresh.let {
+            it.setOnRefreshListener {
+                viewModel.refreshList()
+            }
+        }
+        viewModel.isRefreshing.observe(this, Observer {
+            it?.let {
+                binding.swipeRefresh.isRefreshing = it
+            }
+        })
+        viewModel.message.observe(this, Observer {
+            it?.let {
+                toast(context!!, it)
+                viewModel.onMessageShowed()
+            }
+        })
     }
 
 

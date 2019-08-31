@@ -1,15 +1,11 @@
 package com.example.west2summer.main
 
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -34,7 +30,7 @@ class MapFragment : Fragment() {
 
     private lateinit var binding: MapFragmentBinding
 
-    private lateinit var map: AMap
+    private lateinit var amap: AMap
 
     private lateinit var mapView: TextureMapView
 
@@ -54,18 +50,10 @@ class MapFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        requestPermission()
         binding = MapFragmentBinding.inflate(layoutInflater)
         mapView = binding.mapView
-        map = mapView.map.apply {
-            uiSettings?.apply {
-                isMyLocationButtonEnabled = true
-                isZoomControlsEnabled = false
-                isRotateGesturesEnabled = false
-            }
-            if (haveLocatePermission()) {
-                isMyLocationEnabled = true
-            }
+        amap = mapView.map.apply {
+            isMyLocationEnabled = true
             myLocationStyle = MyLocationStyle().apply {
                 myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE)
                 interval(5000L)
@@ -79,11 +67,16 @@ class MapFragment : Fragment() {
                     moveCamera(CameraUpdateFactory.zoomTo(17f))
                 }
             }
+            uiSettings?.apply {
+                isMyLocationButtonEnabled = true
+                isZoomControlsEnabled = false
+                isRotateGesturesEnabled = false
+            }
         }
+        mapView.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             viewModel.refreshList()
         }
-        mapView.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -110,8 +103,8 @@ class MapFragment : Fragment() {
         viewModel.centerMarkerIsVisible.observe(this, Observer { shouldAddCenterMarker ->
             centerMarker?.remove()
             if (shouldAddCenterMarker) {
-                centerMarker = map.addMarker(MarkerOptions()).apply {
-                    position = map.cameraPosition.target
+                centerMarker = amap.addMarker(MarkerOptions()).apply {
+                    position = amap.cameraPosition.target
                     setIcon(iconAlphaMarker)
                     setupCenterMarkerInfoWindow()
                 }
@@ -131,7 +124,7 @@ class MapFragment : Fragment() {
             }
         })
 
-        map.setInfoWindowAdapter(object : AMap.InfoWindowAdapter {
+        amap.setInfoWindowAdapter(object : AMap.InfoWindowAdapter {
             override fun getInfoContents(marker: Marker?) = null
 
             override fun getInfoWindow(marker: Marker?): View {
@@ -142,7 +135,7 @@ class MapFragment : Fragment() {
             }
         })
 
-        map.setOnCameraChangeListener(object : AMap.OnCameraChangeListener {
+        amap.setOnCameraChangeListener(object : AMap.OnCameraChangeListener {
             override fun onCameraChange(p0: CameraPosition?) {
                 centerMarker?.hideInfoWindow()
             }
@@ -155,18 +148,19 @@ class MapFragment : Fragment() {
             }
         })
 
-        map.setOnInfoWindowClickListener {
+        amap.setOnInfoWindowClickListener {
             if (User.isLoginned()) {
                 navigateToAddFragment()
+                viewModel.onFabClicked()
             } else {
                 Toast.makeText(context, getString(R.string.please_login), Toast.LENGTH_SHORT).show()
                 findNavController().navigate(MapFragmentDirections.actionGlobalLoginFragment())
             }
         }
 
-        map.setOnMarkerClickListener {
+        amap.setOnMarkerClickListener {
             if (it != centerMarker || viewModel.centerMarkerIsVisible.value == false) {
-                map.animateCamera(CameraUpdateFactory.newLatLng(it.position))
+                amap.animateCamera(CameraUpdateFactory.newLatLng(it.position))
                 findNavController().navigate(
                     MapFragmentDirections.actionMapFragmentToBikeInfoDialog(
                         viewModel.markerMapping.value!![it.options]!!
@@ -195,14 +189,14 @@ class MapFragment : Fragment() {
     }
 
     private fun refreshMarkers() {
-        map.clear(true)
+        amap.clear(true)
         viewModel.markerMapping.value?.entries?.forEach {
             if (User.currentUser.value?.id == it.value.ownerId) {
                 it.key.icon(iconYellowMarker)
             } else {
                 it.key.icon(iconBlueMarker)
             }
-            map.addMarker(it.key)
+            amap.addMarker(it.key)
         }
     }
 
@@ -219,7 +213,23 @@ class MapFragment : Fragment() {
                 )
             )
         }
-        viewModel.onFabClicked()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.map_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.refresh -> {
+                viewModel.refreshList()
+            }
+            else -> {
+                return false
+            }
+        }
+        return true
     }
 
     override fun onResume() {
@@ -240,61 +250,6 @@ class MapFragment : Fragment() {
     override fun onDestroy() {
         mapView.onDestroy()
         super.onDestroy()
-    }
-
-    private fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val permissions = mutableListOf<String>()
-            if (ContextCompat.checkSelfPermission(
-                    context!!,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-            if (ContextCompat.checkSelfPermission(
-                    context!!,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Toast.makeText(
-                    context,
-                    getString(R.string.location_permission_needed),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                Toast.makeText(
-                    context,
-                    getString(R.string.strorage_permission_needed),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            if (permissions.size != 0) {
-                requestPermissions(permissions.toTypedArray(), 0)
-            }
-        }
-    }
-
-    private fun haveLocatePermission(): Boolean {
-        return (ContextCompat.checkSelfPermission(
-            context!!,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            map.isMyLocationEnabled = true
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private val iconYellowMarker by lazy {
@@ -343,22 +298,4 @@ class MapFragment : Fragment() {
                     })
         )
     }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.refresh -> {
-                viewModel.refreshList()
-            }
-            else -> {
-                return false
-            }
-        }
-        return true
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.map_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
 }

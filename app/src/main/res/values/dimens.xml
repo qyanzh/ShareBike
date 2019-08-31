@@ -4,4 +4,5 @@
     <dimen name="bottom_sheet_start_margin">16dp</dimen>
     <dimen name="bottom_sheet_item_height">48dp</dimen>
     <dimen name="status_bar_height">24dp</dimen>
+    <dimen name="alpha_image_min_height">30dp</dimen>
 </resources>

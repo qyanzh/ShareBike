@@ -2,17 +2,21 @@ package com.example.west2summer.edit
 
 import android.app.Application
 import androidx.lifecycle.*
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.west2summer.R
 import com.example.west2summer.component.EditState
-import com.example.west2summer.component.shortTimeFormatter
 import com.example.west2summer.source.BikeInfo
 import com.example.west2summer.source.Repository
 import com.example.west2summer.source.User
+import com.example.west2summer.worker.ImageUploadWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+import java.text.SimpleDateFormat
 import java.util.*
 
 class BikeEditViewModel(
@@ -24,6 +28,8 @@ class BikeEditViewModel(
 
     val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
+    private val workManager = WorkManager.getInstance(app)
+
     val editSuccess = MutableLiveData<Boolean?>()
 
     fun onSuccess() {
@@ -34,6 +40,12 @@ class BikeEditViewModel(
 
     fun onMessageShowed() {
         message.value = null
+    }
+
+    /* 模式 */
+    val mode: EditState = when (bikeInfo.id) {
+        -1L -> EditState.ADD
+        else -> EditState.EDIT
     }
 
     /* 标题 */
@@ -48,25 +60,19 @@ class BikeEditViewModel(
     /* 备注 */
     val uiNote = MutableLiveData<String?>()
 
-    /* 模式 */
-    val mode: EditState = when (bikeInfo.id) {
-        -1L -> EditState.ADD
-        else -> EditState.EDIT
-    }
-
     /* 图片 */
-    var bikeImage = MutableLiveData<String?>()
+    var uiImg = MutableLiveData<String?>()
 
     fun onImagePicked(image: String) {
-        bikeImage.value = image
+        uiImg.value = image
     }
 
     fun onImageCanceled() {
-        bikeImage.value = null
+        uiImg.value = null
     }
 
     /* 时间 */
-    private val timeFormatter = shortTimeFormatter
+    private val timeFormatter = SimpleDateFormat("yy/MM/dd HH:mm", Locale.getDefault())
 
     val preUiFrom = MutableLiveData<Calendar?>()
     val uiFrom = Transformations.map(preUiFrom) {
@@ -114,6 +120,7 @@ class BikeEditViewModel(
             }
             price?.let { uiPrice.value = price.toString() }
             note?.let { uiNote.value = note }
+            img?.let { uiImg.value = img }
         }
     }
 
@@ -152,15 +159,33 @@ class BikeEditViewModel(
         }
     }
 
+    private fun uploadImg(id: Long, path: String) {
+        val data = Data.Builder()
+            .putLong("bikeId", id)
+            .putString("path", path)
+            .build()
+        val uploadRequest = OneTimeWorkRequestBuilder<ImageUploadWorker>()
+            .setInputData(data)
+            .build()
+        workManager.enqueue(uploadRequest)
+    }
+
     /*提交*/
     private suspend fun submit() {
         try {
+            var id = bikeInfo.id
             if (mode == EditState.ADD) {
-                Repository.insertBikeInfo(bikeInfo)
+                id = Repository.insertBikeInfo(bikeInfo)
                 message.value = app.getString(R.string.create_success)
             } else {
+                if (uiImg.value == null) bikeInfo.img = null
                 Repository.updateBikeInfo(bikeInfo)
                 message.value = app.getString(R.string.modify_success)
+            }
+            uiImg.value?.let {
+                if (bikeInfo.img != it) {
+                    uploadImg(id, it)
+                }
             }
             editSuccess.value = true
         } catch (e: Exception) {

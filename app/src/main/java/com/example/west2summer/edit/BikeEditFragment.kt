@@ -9,13 +9,18 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.bigkoo.pickerview.builder.TimePickerBuilder
 import com.example.west2summer.R
-import com.example.west2summer.component.*
+import com.example.west2summer.component.EditBaseFragment
+import com.example.west2summer.component.EditState
+import com.example.west2summer.component.convertImageUriToPath
+import com.example.west2summer.component.toast
 import com.example.west2summer.databinding.BikeEditFragmentBinding
 import com.example.west2summer.main.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.*
 
 class BikeEditFragment : EditBaseFragment() {
+
+    private val REQUEST_BIKE_IMAGE = 103
 
     private lateinit var binding: BikeEditFragmentBinding
 
@@ -118,7 +123,7 @@ class BikeEditFragment : EditBaseFragment() {
                     }.show()
             }
             R.id.edit_image -> {
-                if (viewModel.bikeImage.value == null) {
+                if (viewModel.uiImg.value == null) {
                     pickImage()
                 } else {
                     MaterialAlertDialogBuilder(
@@ -138,14 +143,14 @@ class BikeEditFragment : EditBaseFragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_BIKE_IMAGE) {
             data?.let {
-                handleImage(requireContext(), data)?.let {
+                convertImageUriToPath(requireContext(), data)?.let {
                     viewModel.onImagePicked(it)
                 }
             }
         }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun pickImage() {
@@ -153,6 +158,5 @@ class BikeEditFragment : EditBaseFragment() {
         intent.type = "image/*"
         startActivityForResult(intent, REQUEST_BIKE_IMAGE)
     }
-
 
 }

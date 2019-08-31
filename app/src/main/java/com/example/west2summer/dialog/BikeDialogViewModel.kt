@@ -204,6 +204,7 @@ class BikeDialogViewModel(
                     message.value = when (e) {
                         is ConnectException -> app.getString(R.string.exam_network)
                         is UsingException -> app.getString(R.string.using_uncancelable)
+                        is UseCompletedException -> app.getString(R.string.used_uncancelable)
                         else -> e.toString()
                     }
                 }

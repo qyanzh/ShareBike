@@ -24,6 +24,7 @@ data class BikeInfo(
     @field:Json(name = "lease_status") var leaseStatus: Int = 0,//租借状态
     @field:Json(name = "image") var img: String? = null
 ) : Parcelable {
+
     private fun avaFromString(): String =
         shortTimeFormatter.format(avaFrom)
 

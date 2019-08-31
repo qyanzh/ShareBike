@@ -61,7 +61,7 @@ class OrderListViewModel(val app: Application) : AndroidViewModel(app) {
         } catch (e: Exception) {
             message.value = when (e) {
                 is ConnectException -> app.getString(R.string.exam_network)
-                else -> e.toString()
+                else -> app.getString(R.string.bike_deleted)
             }
         }
         return null
