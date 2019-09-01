@@ -106,14 +106,14 @@ class BikeDialogFragment : BottomSheetDialogFragment() {
                         if (ids.isNotEmpty()) {
                             MaterialAlertDialogBuilder(context!!, R.style.AlertDialogTheme)
                                 .setTitle(getString(R.string.choose_people))
-                                .setSingleChoiceItems(ids.toTypedArray(), -1) { dialog, index ->
+                                .setSingleChoiceItems(ids.toTypedArray(), -1) { _, index ->
                                     viewModel.setChoice(records[index].id)
                                 }
-                                .setPositiveButton(getString(R.string.confirm_rent_out)) { dialog, index ->
+                                .setPositiveButton(getString(R.string.confirm_rent_out)) { dialog, _ ->
                                     viewModel.onConfirmRentClicked()
                                     dialog.dismiss()
                                 }
-                                .setNegativeButton(getString(R.string.cancel)) { dialog, index ->
+                                .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                                     viewModel.clearChoice()
                                     dialog.dismiss()
                                 }.show()

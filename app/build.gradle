@@ -110,4 +110,7 @@ dependencies {
     //Worker
     def worker_version = "2.2.0"
     implementation "androidx.work:work-runtime-ktx:$worker_version"
+
+    //image compress
+    implementation 'com.github.nanchen2251:CompressHelper:1.0.5'
 }

@@ -5,6 +5,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.west2summer.source.Network
 import com.example.west2summer.source.Repository
+import com.nanchen.compresshelper.CompressHelper
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -29,8 +30,9 @@ class ImageUploadWorker(context: Context, params: WorkerParameters) :
     @Throws(Exception::class)
     private suspend fun uploadFile(bikeId: Long, filePath: String) {
         val file = File(filePath)
-        val type = file.absolutePath.split(".").last()
-        val requestFile = file
+        val compressedFile = CompressHelper.getDefault(applicationContext).compressToFile(file)
+        val type = compressedFile.absolutePath.split(".").last()
+        val requestFile = compressedFile
             .asRequestBody("image/$type".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
         Timber.d("uploading")
